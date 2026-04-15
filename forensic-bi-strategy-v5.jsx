@@ -395,7 +395,7 @@ function Strategy() {
       await tryLoad("milestoneDate", setMilestoneDate);
       await tryLoad("savedReviews", setSavedReviews);
       await tryLoad("prospects", setProspects);
-      await tryLoad("enclaveLink", setEnclaveLink);
+      // enclaveLink is loaded from Firestore in the auth listener, not localStorage
       try {
         const r = await window.storage.get("financial");
         if (r) { const f = JSON.parse(r.value); setMonthly(f.monthly); setSavings(f.savings); setProjectedMonthly(f.projectedMonthly || 0); setTaxRate(f.taxRate || 25); setBizOverhead(f.bizOverhead || 15000); setUtilization(f.utilization || 70); }
@@ -405,11 +405,20 @@ function Strategy() {
     load();
   }, []);
 
-  // ── Firebase Auth Listener ────────────────────────────────────────────────────
+  // ── Firebase Auth Listener — also loads enclaveLink from Firestore ───────────
   useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+    const unsubscribe = firebase.auth().onAuthStateChanged(async user => {
       setFbUser(user);
       setAuthReady(true);
+      if (user) {
+        try {
+          const snap = await firebase.firestore().doc(`users/${user.uid}`).get();
+          if (snap.exists && snap.data().fbaLink) setEnclaveLink(snap.data().fbaLink);
+        } catch (err) { console.error("Load fbaLink from Firestore error:", err); }
+      } else {
+        // User signed out — clear the link
+        setEnclaveLink({ projectId: null, status: "not_linked", lastChecked: null });
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -447,7 +456,12 @@ function Strategy() {
   const saveEnclaveLink = (patch) => {
     const next = { ...enclaveLink, ...patch };
     setEnclaveLink(next);
-    save("enclaveLink", next);
+    // Persist to Firestore (cross-device) instead of localStorage
+    if (fbUser) {
+      firebase.firestore().doc(`users/${fbUser.uid}`)
+        .set({ fbaLink: next }, { merge: true })
+        .catch(err => console.error("saveEnclaveLink Firestore error:", err));
+    }
   };
 
   const signInWithGoogle = () => {
@@ -488,6 +502,15 @@ function Strategy() {
     const roadmapId   = "fba_" + fbUser.uid;
 
     try {
+      // Fix 3 — Preflight: confirm this Google account is a registered Enclave member
+      const userSnap = await db.doc(`users/${fbUser.uid}`).get();
+      if (!userSnap.exists) {
+        setCollabError("Your Google account isn't registered in Enclave yet. Sign in to Enclave first, then retry here.");
+        saveEnclaveLink({ status: "not_linked" });
+        setCollabCreating(false);
+        return;
+      }
+
       const docRef = await db.collection("projects").add({
         name:            "Forensic BI Strategy",
         description:     "Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.",
@@ -770,7 +793,12 @@ function Strategy() {
                           </div>
                         )}
                         {collabError && (
-                          <div style={{ fontSize: 12, color: C.red, ...SF, marginTop: 4 }}>⚠ {collabError}</div>
+                          <div style={{ fontSize: 12, color: C.red, ...SF, marginTop: 4 }}>
+                            ⚠ {collabError}
+                            {collabError.includes("Enclave") && (
+                              <> · <a href={ENCLAVE_URL} target="_blank" rel="noopener" style={{ color: C.blue, textDecoration: "underline" }}>Open Enclave →</a></>
+                            )}
+                          </div>
                         )}
                         {authReady && fbUser && colStatus === "linked" && (
                           <div style={{ fontSize: 12, color: C.green, ...SF }}>✓ Linked · Project ID: <span style={{ fontFamily: "monospace", fontSize: 11 }}>{enclaveLink.projectId}</span></div>
