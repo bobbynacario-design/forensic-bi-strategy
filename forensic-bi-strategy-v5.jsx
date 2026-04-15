@@ -685,18 +685,44 @@ function Strategy() {
 
       {/* HEADER */}
       <div className="hp" style={{ background: headerBg, borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <div style={{ fontSize: 9, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 5, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
-          <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Going Independent in the Philippines — <span style={{ color: C.gold }}>CPA · CIA · Forensic BI</span></h1>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
-            <div style={{ flex: 1, height: 4, background: C.borderSub, borderRadius: 2, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${C.gold},#E8C98E)`, borderRadius: 2, transition: "width 0.4s" }} />
+        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", gap: 20 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 9, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 5, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
+            <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Going Independent in the Philippines — <span style={{ color: C.gold }}>CPA · CIA · Forensic BI</span></h1>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
+              <div style={{ flex: 1, height: 4, background: C.borderSub, borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${C.gold},#E8C98E)`, borderRadius: 2, transition: "width 0.4s" }} />
+              </div>
+              <span style={{ fontSize: 11, color: C.gold, ...SF, whiteSpace: "nowrap" }}>{completedCount}/{totalTasks} tasks · {pct}%</span>
+              <span style={{ fontSize: 11, color: C.green, ...SF, whiteSpace: "nowrap" }}>{achievedCount}/{milestonesList.length} milestones</span>
+              <button onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 6, padding: "3px 9px", cursor: "pointer", fontSize: 13, color: C.textMid, ...SF, transition: "all 0.2s", flexShrink: 0, lineHeight: 1.6 }}>
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
             </div>
-            <span style={{ fontSize: 11, color: C.gold, ...SF, whiteSpace: "nowrap" }}>{completedCount}/{totalTasks} tasks · {pct}%</span>
-            <span style={{ fontSize: 11, color: C.green, ...SF, whiteSpace: "nowrap" }}>{achievedCount}/{milestonesList.length} milestones</span>
-            <button onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 6, padding: "3px 9px", cursor: "pointer", fontSize: 13, color: C.textMid, ...SF, transition: "all 0.2s", flexShrink: 0, lineHeight: 1.6 }}>
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
+          </div>
+          <div style={{ width: 54, height: 54, flexShrink: 0 }}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+              <defs>
+                <linearGradient id="logoGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#E8C98E" />
+                  <stop offset="100%" stopColor="#C8A96E" />
+                </linearGradient>
+                <linearGradient id="logoBlue" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3a6f80" />
+                  <stop offset="100%" stopColor="#7EB8C9" />
+                </linearGradient>
+              </defs>
+              <path d="M60 10 L104 32 L104 82 L60 114 L16 82 L16 32 Z" fill="none" stroke="url(#logoBlue)" strokeWidth="4" strokeLinejoin="round" opacity="0.2"/>
+              <path d="M60 22 L92 38 L92 76 L60 100 L28 76 L28 38 Z" fill="none" stroke="url(#logoBlue)" strokeWidth="3" strokeLinejoin="round" opacity="0.6"/>
+              <rect x="42" y="65" width="8" height="15" rx="3" fill="url(#logoGold)" />
+              <rect x="56" y="50" width="8" height="30" rx="3" fill="url(#logoGold)" />
+              <rect x="70" y="35" width="8" height="45" rx="3" fill="url(#logoGold)" />
+              <circle cx="46" cy="65" r="3.5" fill={C.textMid} />
+              <circle cx="60" cy="50" r="3.5" fill={C.textMid} />
+              <circle cx="74" cy="35" r="3.5" fill={C.textMid} />
+              <path d="M46 65 L60 50 L74 35" fill="none" stroke={C.textMid} strokeWidth="2" opacity="0.9" strokeLinecap="round"/>
+              <circle cx="60" cy="50" r="18" fill="none" stroke="#7EC9A2" strokeWidth="2" opacity="0.8" strokeDasharray="4 4" />
+            </svg>
           </div>
         </div>
       </div>
