@@ -1,15 +1,20 @@
 const { useState, useEffect } = React;
 
 // ─── PALETTE ──────────────────────────────────────────────────────────────────
-const C = {
+const DARK_C = {
   bg: "#0D0F14", surface: "#13161f", border: "#2a2f3e", borderSub: "#1e2330",
   text: "#E8E0D0", textMid: "#B0AEAD", textDim: "#8a8fa8", textMute: "#6a7080",
   gold: "#C8A96E", blue: "#7EB8C9", green: "#7EC9A2", purple: "#A98FCE",
   orange: "#E8A87C", red: "#E87F6B",
 };
-const SF = { fontFamily: "system-ui, sans-serif" };
-const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "20px 24px" };
-const inputSt = { background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, color: C.text, padding: "8px 12px", fontSize: 14, ...SF, width: "100%", boxSizing: "border-box", outline: "none" };
+const LIGHT_C = {
+  bg: "#F5F1EC", surface: "#FFFFFF", border: "#DDD8D0", borderSub: "#EDE9E3",
+  text: "#1A1614", textMid: "#4A4240", textDim: "#6A6560", textMute: "#9A9590",
+  gold: "#C8A96E", blue: "#7EB8C9", green: "#7EC9A2", purple: "#A98FCE",
+  orange: "#E8A87C", red: "#E87F6B",
+};
+const C = DARK_C; // module-level alias — used by static data arrays (phases, etc.)
+const SF = { fontFamily: "'DM Sans', system-ui, sans-serif" };
 
 // ─── PRIMARY LANE: Phases A–E ─────────────────────────────────────────────────
 const phases = [
@@ -366,6 +371,15 @@ function Strategy() {
   const [collabCreating, setCollabCreating] = useState(false);
   const [collabError, setCollabError] = useState(null);
 
+  // ── Theme ─────────────────────────────────────────────────────────────────────
+  const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch { return 'dark'; } });
+  // Shadow module-level C with the active theme palette — used by all component rendering
+  const C = theme === 'dark' ? DARK_C : LIGHT_C; // eslint-disable-line no-shadow
+  const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "20px 24px" };
+  const inputSt = { background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, color: C.text, padding: "8px 12px", fontSize: 14, ...SF, width: "100%", boxSizing: "border-box", outline: "none" };
+  const toggleTheme = () => { const n = theme === 'dark' ? 'light' : 'dark'; setTheme(n); try { localStorage.setItem('fba_theme', n); } catch {} };
+  const headerBg = theme === 'dark' ? 'linear-gradient(135deg,#0D0F14 0%,#1a1f2e 100%)' : 'linear-gradient(135deg,#F0ECE7 0%,#EAE5DE 100%)';
+
   // ── Storage ───────────────────────────────────────────────────────────────────
   const save = async (key, val) => { try { await window.storage.set(key, JSON.stringify(val)); } catch {} };
 
@@ -540,21 +554,22 @@ function Strategy() {
   // ── Inject CSS ────────────────────────────────────────────────────────────────
   useEffect(() => {
     const s = document.createElement("style");
+    const hoverBorder = theme === 'dark' ? '#3a3f50' : '#c5bfb5';
     s.innerHTML = `
       .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
       .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-      .tab-bar{display:flex;gap:1px;border-bottom:1px solid #2a2f3e;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+      .tab-bar{display:flex;gap:1px;border-bottom:1px solid ${C.border};flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
       .tab-bar::-webkit-scrollbar{display:none}
       .sub-tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
       .pp{padding:20px 32px}
       .hp{padding:22px 32px 18px}
       @media(max-width:640px){.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.pp{padding:14px 16px!important}.hp{padding:16px 16px 14px!important}}
-      .task-row:hover{border-color:#3a3f50!important}
-      .prospect-card:hover{border-color:#3a3f50!important}
+      .task-row:hover{border-color:${hoverBorder}!important}
+      .prospect-card:hover{border-color:${hoverBorder}!important}
     `;
     document.head.appendChild(s);
     return () => document.head.removeChild(s);
-  }, []);
+  }, [theme]);
 
   // ── Sub-components ────────────────────────────────────────────────────────────
   const PriorityBadge = ({ p }) => {
@@ -565,7 +580,7 @@ function Strategy() {
   const TaskList = ({ tasks, color }) => tasks.map(task => {
     const done = completed[task.id];
     return (
-      <div key={task.id} className="task-row" onClick={() => toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${color}08` : "#0D0F14", border: `1px solid ${done ? color + "35" : "#1e2330"}`, cursor: "pointer", transition: "all 0.15s", marginBottom: 7 }}>
+      <div key={task.id} className="task-row" onClick={() => toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${color}08` : C.bg, border: `1px solid ${done ? color + "35" : C.borderSub}`, cursor: "pointer", transition: "all 0.15s", marginBottom: 7 }}>
         <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? color : "#3a3f50"}`, background: done ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
           {done && <span style={{ color: "#0D0F14", fontSize: 11, fontWeight: 700 }}>✓</span>}
         </div>
@@ -596,7 +611,7 @@ function Strategy() {
     const total = gateTotal(phase.id);
     const clear = done === total;
     return (
-      <div style={{ background: clear ? `${phase.color}10` : "#0D0F14", border: `1px solid ${clear ? phase.color + "50" : C.border}`, borderRadius: 10, padding: "18px 22px", marginTop: 16 }}>
+      <div style={{ background: clear ? `${phase.color}10` : C.bg, border: `1px solid ${clear ? phase.color + "50" : C.border}`, borderRadius: 10, padding: "18px 22px", marginTop: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: clear ? phase.color : C.textMute, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em" }}>
             {clear ? "✓ " : ""}{phase.gate.label}
@@ -632,24 +647,27 @@ function Strategy() {
   if (!loaded) return <div style={{ background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: C.gold, ...SF }}>Loading your operating system...</div>;
 
   return (
-    <div style={{ fontFamily: "'Georgia','Times New Roman',serif", background: C.bg, minHeight: "100vh", color: C.text }}>
+    <div style={{ ...SF, background: C.bg, minHeight: "100vh", color: C.text }}>
 
       {/* HEADER */}
-      <div className="hp" style={{ background: "linear-gradient(135deg,#0D0F14 0%,#1a1f2e 100%)", borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ maxWidth: 980, margin: "0 auto" }}>
+      <div className="hp" style={{ background: headerBg, borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <div style={{ fontSize: 9, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 5, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
           <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Going Independent in the Philippines — <span style={{ color: C.gold }}>CPA · CIA · Forensic BI</span></h1>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
-            <div style={{ flex: 1, height: 4, background: "#1e2330", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ flex: 1, height: 4, background: C.borderSub, borderRadius: 2, overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${C.gold},#E8C98E)`, borderRadius: 2, transition: "width 0.4s" }} />
             </div>
             <span style={{ fontSize: 11, color: C.gold, ...SF, whiteSpace: "nowrap" }}>{completedCount}/{totalTasks} tasks · {pct}%</span>
             <span style={{ fontSize: 11, color: C.green, ...SF, whiteSpace: "nowrap" }}>{achievedCount}/{milestonesList.length} milestones</span>
+            <button onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 6, padding: "3px 9px", cursor: "pointer", fontSize: 13, color: C.textMid, ...SF, transition: "all 0.2s", flexShrink: 0, lineHeight: 1.6 }}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="pp" style={{ maxWidth: 980, margin: "0 auto" }}>
+      <div className="pp" style={{ maxWidth: 1400, margin: "0 auto" }}>
 
         {/* TABS */}
         <div className="tab-bar" style={{ marginBottom: 24 }}>
@@ -716,7 +734,7 @@ function Strategy() {
                 {topMustTasks.length === 0
                   ? <div style={{ color: C.green, fontSize: 13, ...SF }}>✓ All Must tasks in this phase are complete. Check your gate criteria below, then advance.</div>
                   : topMustTasks.map(t => (
-                    <div key={t.id} className="task-row" onClick={() => toggleTask(t.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: "#0D0F14", border: `1px solid ${C.borderSub}`, cursor: "pointer", marginBottom: 7, transition: "all 0.15s" }}>
+                    <div key={t.id} className="task-row" onClick={() => toggleTask(t.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: C.bg, border: `1px solid ${C.borderSub}`, cursor: "pointer", marginBottom: 7, transition: "all 0.15s" }}>
                       <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${C.red}`, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }} />
                       <span style={{ ...SF, fontSize: 13.5, color: C.textMid, lineHeight: 1.5, flex: 1 }}>{t.text}</span>
                       <PriorityBadge p={t.priority} />
@@ -1321,7 +1339,7 @@ function Strategy() {
                   {p.tasks.map(task => {
                     const done = completed[task.id];
                     return (
-                      <div key={task.id} onClick={() => !(!track2Unlocked) && toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${p.color}08` : "#0D0F14", border: `1px solid ${done ? p.color + "35" : C.borderSub}`, cursor: !track2Unlocked ? "not-allowed" : "pointer", transition: "all 0.15s", marginBottom: 7, opacity: !track2Unlocked ? 0.5 : 1 }}>
+                      <div key={task.id} onClick={() => !(!track2Unlocked) && toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${p.color}08` : C.bg, border: `1px solid ${done ? p.color + "35" : C.borderSub}`, cursor: !track2Unlocked ? "not-allowed" : "pointer", transition: "all 0.15s", marginBottom: 7, opacity: !track2Unlocked ? 0.5 : 1 }}>
                         <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? p.color : "#3a3f50"}`, background: done ? p.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           {done && <span style={{ color: "#0D0F14", fontSize: 11, fontWeight: 700 }}>✓</span>}
                         </div>
