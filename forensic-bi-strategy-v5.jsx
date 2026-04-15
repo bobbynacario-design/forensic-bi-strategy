@@ -359,10 +359,12 @@ function Strategy() {
   const [milestoneDate, setMilestoneDate] = useState({});
   const [loaded, setLoaded] = useState(false);
 
-  // ── Enclave Integration (Pass 1) ──────────────────────────────────────────────
+  // ── Enclave Integration ───────────────────────────────────────────────────────
   const [fbUser, setFbUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [enclaveLink, setEnclaveLink] = useState({ projectId: null, status: "not_linked", lastChecked: null });
+  const [collabCreating, setCollabCreating] = useState(false);
+  const [collabError, setCollabError] = useState(null);
 
   // ── Storage ───────────────────────────────────────────────────────────────────
   const save = async (key, val) => { try { await window.storage.set(key, JSON.stringify(val)); } catch {} };
@@ -458,9 +460,45 @@ function Strategy() {
     window.open(`${ENCLAVE_URL}/?page=projects&projectId=${enclaveLink.projectId}`, "_blank");
   };
 
-  // Pass 2 — full implementation coming
-  const createCollaborationSpace = () => {
-    alert("Create Collaboration Space — coming in Pass 2.\n\nThis will create an Enclave project linked to this roadmap.");
+  // Pass 2 — Create Enclave project, save link, open Enclave
+  const createCollaborationSpace = async () => {
+    if (!fbUser) { signInWithGoogle(); return; }
+    if (enclaveLink.status === "linked") { openInEnclave(); return; }
+
+    setCollabCreating(true);
+    setCollabError(null);
+    saveEnclaveLink({ status: "checking" });
+
+    const db = firebase.firestore();
+    const displayName = fbUser.displayName || fbUser.email || "Member";
+    const roadmapId   = "fba_" + fbUser.uid;
+
+    try {
+      const docRef = await db.collection("projects").add({
+        name:            "Forensic BI Strategy",
+        description:     "Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.",
+        status:          "active",
+        createdBy:       fbUser.uid,
+        createdByName:   displayName,
+        createdAt:       firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt:       firebase.firestore.FieldValue.serverTimestamp(),
+        memberIds:       [fbUser.uid],
+        memberNames:     { [fbUser.uid]: displayName },
+        // Bridge fields — link back to this roadmap app
+        originApp:       "roadmap",
+        originRoadmapId: roadmapId,
+      });
+
+      saveEnclaveLink({ projectId: docRef.id, status: "linked", lastChecked: Date.now() });
+      setCollabCreating(false);
+      window.open(`${ENCLAVE_URL}/?page=projects&projectId=${docRef.id}`, "_blank");
+
+    } catch (err) {
+      console.error("Create collaboration space failed:", err);
+      setCollabError(err.message || "Failed to create. Check that you are signed in to the right Google account.");
+      saveEnclaveLink({ status: "not_linked" });
+      setCollabCreating(false);
+    }
   };
 
   const relinkSpace = () => {
@@ -709,7 +747,12 @@ function Strategy() {
                           <div style={{ fontSize: 12, color: C.textDim, ...SF }}>No collaboration space linked. Create one to start working with your team in Enclave.</div>
                         )}
                         {authReady && fbUser && colStatus === "checking" && (
-                          <div style={{ fontSize: 12, color: C.textMute, ...SF }}>Checking connection to Enclave…</div>
+                          <div style={{ fontSize: 12, color: C.textMute, ...SF }}>
+                            {collabCreating ? "Creating collaboration space in Enclave…" : "Checking connection to Enclave…"}
+                          </div>
+                        )}
+                        {collabError && (
+                          <div style={{ fontSize: 12, color: C.red, ...SF, marginTop: 4 }}>⚠ {collabError}</div>
                         )}
                         {authReady && fbUser && colStatus === "linked" && (
                           <div style={{ fontSize: 12, color: C.green, ...SF }}>✓ Linked · Project ID: <span style={{ fontFamily: "monospace", fontSize: 11 }}>{enclaveLink.projectId}</span></div>
@@ -729,13 +772,17 @@ function Strategy() {
                           </>
                         ) : colStatus === "broken" ? (
                           <>
-                            <button onClick={createCollaborationSpace} style={{ ...btnBase, background: C.gold, color: "#0D0F14" }}>Create New Space</button>
-                            <button onClick={relinkSpace} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute }}>Relink Existing</button>
+                            <button onClick={createCollaborationSpace} disabled={collabCreating} style={{ ...btnBase, background: C.gold, color: "#0D0F14", opacity: collabCreating ? 0.5 : 1 }}>
+                              {collabCreating ? "Creating…" : "Create New Space"}
+                            </button>
+                            <button onClick={relinkSpace} disabled={collabCreating} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, opacity: collabCreating ? 0.4 : 1 }}>Relink Existing</button>
                           </>
                         ) : (
                           <>
-                            <button onClick={createCollaborationSpace} style={{ ...btnBase, background: C.blue, color: "#0D0F14" }}>Create Collaboration Space</button>
-                            <button onClick={relinkSpace} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute }}>Relink Existing</button>
+                            <button onClick={createCollaborationSpace} disabled={collabCreating} style={{ ...btnBase, background: C.blue, color: "#0D0F14", opacity: collabCreating ? 0.5 : 1 }}>
+                              {collabCreating ? "Creating…" : "Create Collaboration Space"}
+                            </button>
+                            <button onClick={relinkSpace} disabled={collabCreating} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, opacity: collabCreating ? 0.4 : 1 }}>Relink Existing</button>
                           </>
                         )}
                         {authReady && fbUser && (
