@@ -312,6 +312,11 @@ const milestonesList = [
 
 const urgencyColors = { HIGH: C.red, MEDIUM: C.gold };
 
+// ─── ENCLAVE INTEGRATION ──────────────────────────────────────────────────────
+const ENCLAVE_URL = "https://bobbynacario-design.github.io/enclave";
+// Pass 1 link shape stored in localStorage key "enclaveLink"
+// { projectId: string|null, status: "not_linked"|"checking"|"linked"|"broken", lastChecked: number|null }
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 function Strategy() {
   // ── Core State ───────────────────────────────────────────────────────────────
@@ -354,6 +359,11 @@ function Strategy() {
   const [milestoneDate, setMilestoneDate] = useState({});
   const [loaded, setLoaded] = useState(false);
 
+  // ── Enclave Integration (Pass 1) ──────────────────────────────────────────────
+  const [fbUser, setFbUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [enclaveLink, setEnclaveLink] = useState({ projectId: null, status: "not_linked", lastChecked: null });
+
   // ── Storage ───────────────────────────────────────────────────────────────────
   const save = async (key, val) => { try { await window.storage.set(key, JSON.stringify(val)); } catch {} };
 
@@ -369,6 +379,7 @@ function Strategy() {
       await tryLoad("milestoneDate", setMilestoneDate);
       await tryLoad("savedReviews", setSavedReviews);
       await tryLoad("prospects", setProspects);
+      await tryLoad("enclaveLink", setEnclaveLink);
       try {
         const r = await window.storage.get("financial");
         if (r) { const f = JSON.parse(r.value); setMonthly(f.monthly); setSavings(f.savings); setProjectedMonthly(f.projectedMonthly || 0); setTaxRate(f.taxRate || 25); setBizOverhead(f.bizOverhead || 15000); setUtilization(f.utilization || 70); }
@@ -377,6 +388,25 @@ function Strategy() {
     };
     load();
   }, []);
+
+  // ── Firebase Auth Listener ────────────────────────────────────────────────────
+  useEffect(() => {
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      setFbUser(user);
+      setAuthReady(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // ── Health check: verify linked Enclave project still exists ──────────────────
+  useEffect(() => {
+    if (!authReady || !fbUser || !loaded) return;
+    if (!enclaveLink.projectId) return;
+    // Only re-check if never checked or last check was > 5 minutes ago
+    const stale = !enclaveLink.lastChecked || (Date.now() - enclaveLink.lastChecked > 5 * 60 * 1000);
+    if (!stale && enclaveLink.status !== "not_linked") return;
+    checkLinkedProject(enclaveLink.projectId);
+  }, [authReady, fbUser, loaded]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
   const toggleTask = (id) => { const n = { ...completed, [id]: !completed[id] }; setCompleted(n); save("completed", n); };
@@ -395,6 +425,50 @@ function Strategy() {
   const saveFinancial = (patch) => {
     const f = { monthly, savings, projectedMonthly, taxRate, bizOverhead, utilization, ...patch };
     save("financial", f);
+  };
+
+  // ── Enclave helpers ───────────────────────────────────────────────────────────
+  const saveEnclaveLink = (patch) => {
+    const next = { ...enclaveLink, ...patch };
+    setEnclaveLink(next);
+    save("enclaveLink", next);
+  };
+
+  const signInWithGoogle = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).catch(err => console.error("Sign-in error:", err));
+  };
+
+  const signOutFirebase = () => firebase.auth().signOut();
+
+  const checkLinkedProject = async (projectId) => {
+    if (!projectId) return;
+    saveEnclaveLink({ status: "checking" });
+    try {
+      const snap = await firebase.firestore().doc(`projects/${projectId}`).get();
+      saveEnclaveLink({ projectId, status: snap.exists ? "linked" : "broken", lastChecked: Date.now() });
+    } catch (err) {
+      console.error("Enclave health check failed:", err);
+      saveEnclaveLink({ projectId, status: "broken", lastChecked: Date.now() });
+    }
+  };
+
+  const openInEnclave = () => {
+    if (!enclaveLink.projectId) return;
+    window.open(`${ENCLAVE_URL}/?page=projects&projectId=${enclaveLink.projectId}`, "_blank");
+  };
+
+  // Pass 2 — full implementation coming
+  const createCollaborationSpace = () => {
+    alert("Create Collaboration Space — coming in Pass 2.\n\nThis will create an Enclave project linked to this roadmap.");
+  };
+
+  const relinkSpace = () => {
+    const id = prompt("Paste an existing Enclave project ID to relink:");
+    if (id && id.trim()) {
+      saveEnclaveLink({ projectId: id.trim(), status: "checking", lastChecked: null });
+      checkLinkedProject(id.trim());
+    }
   };
   const addProspect = () => {
     if (!newProspect.name.trim()) return;
@@ -612,6 +686,66 @@ function Strategy() {
                   ))
                 }
               </div>
+
+              {/* Enclave Collaboration Card */}
+              {(() => {
+                const colStatus = enclaveLink.status;
+                const borderCol = colStatus === "linked" ? C.green : colStatus === "broken" ? C.red : C.blue;
+                const btnBase = { border: "none", borderRadius: 6, padding: "7px 16px", cursor: "pointer", fontSize: 12, ...SF, fontWeight: 700, transition: "all 0.2s" };
+                return (
+                  <div style={{ background: C.surface, border: `1px solid ${borderCol}35`, borderLeft: `3px solid ${borderCol}`, borderRadius: 10, padding: "16px 22px", marginBottom: 16 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+                      <div>
+                        <div style={{ fontSize: 10, color: borderCol, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>
+                          🔗 Enclave Collaboration Space
+                        </div>
+                        {!authReady && (
+                          <div style={{ fontSize: 12, color: C.textMute, ...SF }}>Checking authentication…</div>
+                        )}
+                        {authReady && !fbUser && (
+                          <div style={{ fontSize: 12, color: C.textDim, ...SF }}>Sign in with Google to link your Enclave workspace.</div>
+                        )}
+                        {authReady && fbUser && colStatus === "not_linked" && (
+                          <div style={{ fontSize: 12, color: C.textDim, ...SF }}>No collaboration space linked. Create one to start working with your team in Enclave.</div>
+                        )}
+                        {authReady && fbUser && colStatus === "checking" && (
+                          <div style={{ fontSize: 12, color: C.textMute, ...SF }}>Checking connection to Enclave…</div>
+                        )}
+                        {authReady && fbUser && colStatus === "linked" && (
+                          <div style={{ fontSize: 12, color: C.green, ...SF }}>✓ Linked · Project ID: <span style={{ fontFamily: "monospace", fontSize: 11 }}>{enclaveLink.projectId}</span></div>
+                        )}
+                        {authReady && fbUser && colStatus === "broken" && (
+                          <div style={{ fontSize: 12, color: C.red, ...SF }}>⚠ Link broken — the Enclave project was not found or was deleted.</div>
+                        )}
+                      </div>
+
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                        {!authReady || colStatus === "checking" ? null : !fbUser ? (
+                          <button onClick={signInWithGoogle} style={{ ...btnBase, background: C.blue, color: "#0D0F14" }}>Sign in with Google</button>
+                        ) : colStatus === "linked" ? (
+                          <>
+                            <button onClick={openInEnclave} style={{ ...btnBase, background: C.green, color: "#0D0F14" }}>Open in Enclave →</button>
+                            <button onClick={() => checkLinkedProject(enclaveLink.projectId)} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute }}>↻ Refresh</button>
+                          </>
+                        ) : colStatus === "broken" ? (
+                          <>
+                            <button onClick={createCollaborationSpace} style={{ ...btnBase, background: C.gold, color: "#0D0F14" }}>Create New Space</button>
+                            <button onClick={relinkSpace} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute }}>Relink Existing</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={createCollaborationSpace} style={{ ...btnBase, background: C.blue, color: "#0D0F14" }}>Create Collaboration Space</button>
+                            <button onClick={relinkSpace} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute }}>Relink Existing</button>
+                          </>
+                        )}
+                        {authReady && fbUser && (
+                          <span style={{ fontSize: 11, color: C.textMute, ...SF, cursor: "pointer", textDecoration: "underline" }} onClick={signOutFirebase}>{fbUser.displayName || fbUser.email} · Sign out</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Bottom Row: Pipeline + Next Milestone + Risk */}
               <div className="g3">

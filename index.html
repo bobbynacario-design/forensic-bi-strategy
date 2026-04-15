@@ -10,6 +10,22 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+  <!-- Firebase 10 compat — same project as Enclave (enclave-social) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    firebase.initializeApp({
+      apiKey:            "AIzaSyBC8nqTgaqMp0R45dnKpA44u0S5C3nnbFE",
+      authDomain:        "enclave-social.firebaseapp.com",
+      projectId:         "enclave-social",
+      storageBucket:     "enclave-social.firebasestorage.app",
+      messagingSenderId: "834210326738",
+      appId:             "1:834210326738:web:61e6ebc4ca892c42dc650b"
+    });
+  </script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0D0F14; }
