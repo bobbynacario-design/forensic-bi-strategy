@@ -370,6 +370,8 @@ function Strategy() {
   const [enclaveLink, setEnclaveLink] = useState({ projectId: null, status: "not_linked", lastChecked: null });
   const [collabCreating, setCollabCreating] = useState(false);
   const [collabError, setCollabError] = useState(null);
+  const [relinkModal, setRelinkModal] = useState(false);
+  const [relinkId, setRelinkId] = useState("");
 
   // ── Theme ─────────────────────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch { return 'dark'; } });
@@ -499,10 +501,9 @@ function Strategy() {
 
     const db = firebase.firestore();
     const displayName = fbUser.displayName || fbUser.email || "Member";
-    const roadmapId   = "fba_" + fbUser.uid;
 
     try {
-      // Fix 3 — Preflight: confirm this Google account is a registered Enclave member
+      // Preflight — confirm this Google account is a registered Enclave member
       const userSnap = await db.doc(`users/${fbUser.uid}`).get();
       if (!userSnap.exists) {
         setCollabError("Your Google account isn't registered in Enclave yet. Sign in to Enclave first, then retry here.");
@@ -510,6 +511,15 @@ function Strategy() {
         setCollabCreating(false);
         return;
       }
+
+      // Fix 2 — Create / upsert a real roadmap document so originRoadmapId is a proper Firestore doc ID
+      const roadmapDocRef = db.collection("roadmaps").doc(fbUser.uid);
+      await roadmapDocRef.set({
+        ownerUid:  fbUser.uid,
+        ownerName: displayName,
+        app:       "forensic-bi-strategy",
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
 
       const docRef = await db.collection("projects").add({
         name:            "Forensic BI Strategy",
@@ -521,9 +531,9 @@ function Strategy() {
         updatedAt:       firebase.firestore.FieldValue.serverTimestamp(),
         memberIds:       [fbUser.uid],
         memberNames:     { [fbUser.uid]: displayName },
-        // Bridge fields — link back to this roadmap app
+        // Bridge fields — real Firestore doc reference back to the roadmap
         originApp:       "roadmap",
-        originRoadmapId: roadmapId,
+        originRoadmapId: roadmapDocRef.id,
       });
 
       saveEnclaveLink({ projectId: docRef.id, status: "linked", lastChecked: Date.now() });
@@ -538,12 +548,13 @@ function Strategy() {
     }
   };
 
-  const relinkSpace = () => {
-    const id = prompt("Paste an existing Enclave project ID to relink:");
-    if (id && id.trim()) {
-      saveEnclaveLink({ projectId: id.trim(), status: "checking", lastChecked: null });
-      checkLinkedProject(id.trim());
-    }
+  const relinkSpace = () => { setRelinkId(""); setRelinkModal(true); };
+  const confirmRelink = () => {
+    if (!relinkId.trim()) return;
+    setRelinkModal(false);
+    setRelinkId("");
+    saveEnclaveLink({ projectId: relinkId.trim(), status: "checking", lastChecked: null });
+    checkLinkedProject(relinkId.trim());
   };
   const addProspect = () => {
     if (!newProspect.name.trim()) return;
@@ -836,6 +847,16 @@ function Strategy() {
                         )}
                       </div>
                     </div>
+                    {relinkModal && (
+                      <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: C.bg, border: `1px solid ${C.border}` }}>
+                        <div style={{ fontSize: 11, color: C.textDim, ...SF, marginBottom: 8 }}>Paste an existing Enclave project ID to relink:</div>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <input value={relinkId} onChange={e => setRelinkId(e.target.value)} onKeyDown={e => e.key === 'Enter' && confirmRelink()} placeholder="Project ID (e.g. abc123XYZ…)" autoFocus style={{ ...inputSt, flex: 1, fontSize: 12, padding: "7px 11px" }} />
+                          <button onClick={confirmRelink} disabled={!relinkId.trim()} style={{ ...btnBase, background: C.gold, color: "#0D0F14", opacity: relinkId.trim() ? 1 : 0.4, flexShrink: 0 }}>Link</button>
+                          <button onClick={() => { setRelinkModal(false); setRelinkId(""); }} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, flexShrink: 0 }}>Cancel</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })()}
