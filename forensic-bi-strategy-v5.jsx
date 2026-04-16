@@ -184,12 +184,6 @@ const reflectionQuestions = [
   "Am I staying on my financial runway plan? Any adjustments needed?",
   "What would a recognized forensic expert in PH do next week that I am not yet doing?",
 ];
-const teamQuestions = [
-  "What did each partner or collaborator commit to last week — and what was actually delivered?",
-  "What is each person's top priority this week?",
-  "What decisions need to be made together this week, and who holds the final call?",
-  "What is currently blocked, and who specifically can unblock it?",
-];
 const partnershipQuestions = [
   "What did each partner commit to last week — and what was actually delivered vs. not?",
   "Is there any misalignment on direction, priorities, or economics that needs to be addressed this week?",
@@ -398,6 +392,16 @@ function Strategy() {
   const [setupName, setSetupName] = useState("Forensic BI Strategy");
   const [setupDesc, setSetupDesc] = useState("Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.");
   const [setupMode, setSetupMode] = useState("solo");
+  const [setupMembers, setSetupMembers] = useState([""]);
+
+  // ── Partnership Finance ───────────────────────────────────────────────────────
+  const [partnerRows, setPartnerRows] = useState([{ name: "", capital: 0, draw: 0 }, { name: "", capital: 0, draw: 0 }]);
+  const [sharedOverhead, setSharedOverhead] = useState(0);
+
+  // ── Client Finance ────────────────────────────────────────────────────────────
+  const [engagementValue, setEngagementValue] = useState(0);
+  const [invoiced, setInvoiced] = useState(0);
+  const [collectedAmt, setCollectedAmt] = useState(0);
 
   // ── Theme ─────────────────────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch { return 'dark'; } });
@@ -428,6 +432,14 @@ function Strategy() {
       try {
         const r = await window.storage.get("financial");
         if (r) { const f = JSON.parse(r.value); setMonthly(f.monthly); setSavings(f.savings); setProjectedMonthly(f.projectedMonthly || 0); setTaxRate(f.taxRate || 25); setBizOverhead(f.bizOverhead || 15000); setUtilization(f.utilization || 70); }
+      } catch {}
+      try {
+        const rp = await window.storage.get("financePartnership");
+        if (rp) { const fp = JSON.parse(rp.value); if (fp.partnerRows) setPartnerRows(fp.partnerRows); if (fp.sharedOverhead != null) setSharedOverhead(fp.sharedOverhead); }
+      } catch {}
+      try {
+        const rc = await window.storage.get("financeClient");
+        if (rc) { const fc = JSON.parse(rc.value); if (fc.engagementValue != null) setEngagementValue(fc.engagementValue); if (fc.invoiced != null) setInvoiced(fc.invoiced); if (fc.collectedAmt != null) setCollectedAmt(fc.collectedAmt); }
       } catch {}
       setLoaded(true);
     };
@@ -480,6 +492,14 @@ function Strategy() {
   const saveFinancial = (patch) => {
     const f = { monthly, savings, projectedMonthly, taxRate, bizOverhead, utilization, ...patch };
     save("financial", f);
+  };
+  const savePartnershipFinance = (patch) => {
+    const f = { partnerRows, sharedOverhead, ...patch };
+    save("financePartnership", f);
+  };
+  const saveClientFinance = (patch) => {
+    const f = { engagementValue, invoiced, collectedAmt, ...patch };
+    save("financeClient", f);
   };
 
   // ── Enclave helpers ───────────────────────────────────────────────────────────
@@ -542,6 +562,24 @@ function Strategy() {
 
       setSetupModal(false);
 
+      // Resolve member emails → Enclave UIDs
+      let memberIds = [fbUser.uid];
+      let memberNames = { [fbUser.uid]: displayName };
+      let pendingInvites = [];
+      const filteredEmails = setupMembers.filter(e => e.trim() && e.trim() !== fbUser.email);
+      for (const email of filteredEmails) {
+        try {
+          const snap = await db.collection("users").where("email", "==", email.trim()).limit(1).get();
+          if (!snap.empty) {
+            const uDoc = snap.docs[0];
+            memberIds.push(uDoc.id);
+            memberNames[uDoc.id] = uDoc.data().displayName || uDoc.data().name || email.trim();
+          } else {
+            pendingInvites.push(email.trim());
+          }
+        } catch { pendingInvites.push(email.trim()); }
+      }
+
       // Store roadmap metadata on the user doc (same collection, no new rules needed)
       await db.doc(`users/${fbUser.uid}`).set({
         roadmapApp:       "forensic-bi-strategy",
@@ -560,8 +598,9 @@ function Strategy() {
         createdByName:   displayName,
         createdAt:       firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt:       firebase.firestore.FieldValue.serverTimestamp(),
-        memberIds:       [fbUser.uid],
-        memberNames:     { [fbUser.uid]: displayName },
+        memberIds,
+        memberNames,
+        ...(pendingInvites.length > 0 ? { pendingInvites } : {}),
         originApp:       "roadmap",
         originRoadmapId: fbUser.uid,
       });
@@ -606,6 +645,7 @@ function Strategy() {
     setSetupName(defaultName);
     setSetupDesc(defaultDesc);
     setSetupMode(workspaceMode);
+    setSetupMembers(workspaceMode === "solo" ? [] : [""]);
     setSetupModal(true);
     setRelinkModal(false);
     setCollabError(null);
@@ -1018,12 +1058,33 @@ function Strategy() {
                           <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 8 }}>Workspace mode</div>
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                             {[{ id: "solo", label: "Solo", desc: "just me" }, { id: "partnership", label: "Partnership", desc: "2–3 partners" }, { id: "client", label: "Client Engagement", desc: "delivery team" }].map(m => (
-                              <button key={m.id} onClick={() => setSetupMode(m.id)} style={{ padding: "6px 13px", borderRadius: 6, border: setupMode === m.id ? `1.5px solid ${C.gold}` : `1.5px solid ${C.border}`, background: setupMode === m.id ? `${C.gold}15` : "transparent", color: setupMode === m.id ? C.gold : C.textMute, cursor: "pointer", fontSize: 12, ...SF, fontWeight: setupMode === m.id ? 700 : 400, transition: "all 0.15s" }}>
+                              <button key={m.id} onClick={() => { setSetupMode(m.id); setSetupMembers(m.id === "solo" ? [] : setupMembers.length ? setupMembers : [""]); }} style={{ padding: "6px 13px", borderRadius: 6, border: setupMode === m.id ? `1.5px solid ${C.gold}` : `1.5px solid ${C.border}`, background: setupMode === m.id ? `${C.gold}15` : "transparent", color: setupMode === m.id ? C.gold : C.textMute, cursor: "pointer", fontSize: 12, ...SF, fontWeight: setupMode === m.id ? 700 : 400, transition: "all 0.15s" }}>
                                 {m.label} <span style={{ fontSize: 10, fontWeight: 400, opacity: 0.7 }}>({m.desc})</span>
                               </button>
                             ))}
                           </div>
                         </div>
+                        {setupMode !== "solo" && (
+                          <div style={{ marginBottom: 16 }}>
+                            <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 6 }}>
+                              {setupMode === "partnership" ? "🤝 Partner emails" : "👥 Team member emails"} <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional — must be signed in to Enclave)</span>
+                            </div>
+                            {setupMembers.map((email, i) => (
+                              <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                                <input value={email} onChange={e => { const n = [...setupMembers]; n[i] = e.target.value; setSetupMembers(n); }} placeholder={setupMode === "partnership" ? "partner@email.com" : "teammate@email.com"} style={{ ...inputSt, fontSize: 12, flex: 1 }} />
+                                {setupMembers.length > 1 && <button onClick={() => setSetupMembers(setupMembers.filter((_, j) => j !== i))} style={{ background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, borderRadius: 5, padding: "0 10px", cursor: "pointer", fontSize: 13, flexShrink: 0 }}>✕</button>}
+                              </div>
+                            ))}
+                            {setupMembers.length < 4 && (
+                              <button onClick={() => setSetupMembers([...setupMembers, ""])} style={{ background: "transparent", border: `1px dashed ${C.border}`, color: C.textMute, borderRadius: 5, padding: "5px 12px", cursor: "pointer", fontSize: 11, ...SF, marginTop: 2 }}>
+                                + Add {setupMode === "partnership" ? "partner" : "member"}
+                              </button>
+                            )}
+                            <div style={{ fontSize: 10, color: C.textMute, ...SF, marginTop: 8, lineHeight: 1.5 }}>
+                              Found members are added immediately. Emails not yet in Enclave are saved as pending invites on the project.
+                            </div>
+                          </div>
+                        )}
                         <div style={{ display: "flex", gap: 8 }}>
                           <button onClick={createCollaborationSpace} disabled={!setupName.trim() || collabCreating} style={{ ...btnBase, background: C.gold, color: "#0D0F14", opacity: setupName.trim() && !collabCreating ? 1 : 0.4, flexShrink: 0 }}>
                             {collabCreating ? "Creating…" : "Create Space →"}
@@ -1281,7 +1342,88 @@ function Strategy() {
         {/* ══════════════ FINANCIAL ══════════════ */}
         {activeTab === "finance" && (
           <div>
-            <p style={{ color: C.textDim, fontSize: 13, ...SF, marginBottom: 20, fontStyle: "italic" }}>Know your numbers exactly. The "min billing to resign" signal tells you when the transition is financially safe.</p>
+            <p style={{ color: C.textDim, fontSize: 13, ...SF, marginBottom: 20, fontStyle: "italic" }}>
+              {workspaceMode === "solo" ? "Know your personal numbers exactly. The min billing signal tells you when the transition is financially safe." : workspaceMode === "partnership" ? "Track shared economics — capital contributions, draws, and shared burn — alongside your personal baseline." : "Track engagement margin and collections alongside your personal cost floor."}
+            </p>
+
+            {/* Partnership Finance Panel */}
+            {workspaceMode === "partnership" && (
+              <div style={{ ...card, marginBottom: 20, border: `1px solid ${C.blue}30` }}>
+                <div style={{ fontSize: 11, color: C.blue, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>🤝 Partnership Economics</div>
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 8 }}>Shared Monthly Overhead (PHP)</div>
+                  <input type="number" value={sharedOverhead} onChange={e => { setSharedOverhead(Number(e.target.value)); savePartnershipFinance({ sharedOverhead: Number(e.target.value) }); }} style={inputSt} placeholder="0" />
+                  <div style={{ fontSize: 11, color: C.textMute, ...SF, marginTop: 4 }}>Software, insurance, admin — split across partners</div>
+                </div>
+                <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 8 }}>Partner Capital & Monthly Draw (PHP)</div>
+                {partnerRows.map((row, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+                    <input value={row.name} onChange={e => { const n = partnerRows.map((r, j) => j === i ? { ...r, name: e.target.value } : r); setPartnerRows(n); savePartnershipFinance({ partnerRows: n }); }} placeholder={`Partner ${i + 1} name`} style={{ ...inputSt, flex: 2, minWidth: 120 }} />
+                    <input type="number" value={row.capital || ""} onChange={e => { const n = partnerRows.map((r, j) => j === i ? { ...r, capital: Number(e.target.value) } : r); setPartnerRows(n); savePartnershipFinance({ partnerRows: n }); }} placeholder="Capital (₱)" style={{ ...inputSt, flex: 1, minWidth: 100 }} />
+                    <input type="number" value={row.draw || ""} onChange={e => { const n = partnerRows.map((r, j) => j === i ? { ...r, draw: Number(e.target.value) } : r); setPartnerRows(n); savePartnershipFinance({ partnerRows: n }); }} placeholder="Monthly draw (₱)" style={{ ...inputSt, flex: 1, minWidth: 100 }} />
+                  </div>
+                ))}
+                {partnerRows.length < 4 && (
+                  <button onClick={() => { const n = [...partnerRows, { name: "", capital: 0, draw: 0 }]; setPartnerRows(n); savePartnershipFinance({ partnerRows: n }); }} style={{ background: "transparent", border: `1px dashed ${C.border}`, color: C.textMute, borderRadius: 5, padding: "5px 12px", cursor: "pointer", fontSize: 11, ...SF, marginBottom: 12 }}>+ Add partner</button>
+                )}
+                {(() => {
+                  const totalDraws = partnerRows.reduce((s, r) => s + (Number(r.draw) || 0), 0);
+                  const totalCapital = partnerRows.reduce((s, r) => s + (Number(r.capital) || 0), 0);
+                  const sharedBurn = totalDraws + Number(sharedOverhead);
+                  return (
+                    <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 12, marginTop: 4, display: "flex", gap: 20, flexWrap: "wrap" }}>
+                      {[["Total Capital", `₱${totalCapital.toLocaleString()}`, C.green], ["Total Monthly Draws", `₱${totalDraws.toLocaleString()}`, C.gold], ["Shared Burn/mo", `₱${sharedBurn.toLocaleString()}`, C.red]].map(([l, v, col]) => (
+                        <div key={l} style={{ textAlign: "center" }}>
+                          <div style={{ fontSize: 11, color: C.textMute, ...SF }}>{l}</div>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: col, ...SF }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* Client Finance Panel */}
+            {workspaceMode === "client" && (
+              <div style={{ ...card, marginBottom: 20, border: `1px solid ${C.purple}30` }}>
+                <div style={{ fontSize: 11, color: C.purple, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>💼 Engagement Economics</div>
+                <div className="g3" style={{ marginBottom: 14 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 4 }}>Total Engagement Value (PHP)</div>
+                    <input type="number" value={engagementValue || ""} onChange={e => { setEngagementValue(Number(e.target.value)); saveClientFinance({ engagementValue: Number(e.target.value) }); }} placeholder="0" style={inputSt} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 4 }}>Invoiced to Date (PHP)</div>
+                    <input type="number" value={invoiced || ""} onChange={e => { setInvoiced(Number(e.target.value)); saveClientFinance({ invoiced: Number(e.target.value) }); }} placeholder="0" style={inputSt} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 4 }}>Collected to Date (PHP)</div>
+                    <input type="number" value={collectedAmt || ""} onChange={e => { setCollectedAmt(Number(e.target.value)); saveClientFinance({ collectedAmt: Number(e.target.value) }); }} placeholder="0" style={inputSt} />
+                  </div>
+                </div>
+                {(() => {
+                  const outstanding = invoiced - collectedAmt;
+                  const uninvoiced = engagementValue - invoiced;
+                  const deliveryCost = totalPersonalBurn + Number(bizOverhead);
+                  const margin = engagementValue > 0 ? Math.round(((engagementValue - deliveryCost) / engagementValue) * 100) : 0;
+                  return (
+                    <div style={{ display: "flex", gap: 16, flexWrap: "wrap", borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
+                      {[
+                        ["Outstanding", `₱${outstanding.toLocaleString()}`, outstanding > 0 ? C.orange : C.green],
+                        ["Uninvoiced", `₱${uninvoiced.toLocaleString()}`, uninvoiced > 0 ? C.blue : C.textMute],
+                        ["Est. Margin", `${margin}%`, margin >= 40 ? C.green : margin >= 20 ? C.gold : C.red],
+                      ].map(([l, v, col]) => (
+                        <div key={l} style={{ textAlign: "center", flex: 1, minWidth: 80 }}>
+                          <div style={{ fontSize: 11, color: C.textMute, ...SF }}>{l}</div>
+                          <div style={{ fontSize: 20, fontWeight: 700, color: col, ...SF }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
             <div className="g2" style={{ marginBottom: 20 }}>
               <div style={{ ...card }}>
                 <div style={{ fontSize: 11, color: C.gold, ...SF, fontWeight: 700, marginBottom: 14, textTransform: "uppercase", letterSpacing: "0.1em" }}>Personal Monthly Expenses (PHP)</div>
@@ -1355,9 +1497,15 @@ function Strategy() {
 
             {/* Min billing to resign */}
             <div style={{ background: `linear-gradient(135deg,${C.gold}12,${C.surface})`, border: `1px solid ${C.gold}40`, borderRadius: 10, padding: "18px 22px" }}>
-              <div style={{ fontSize: 11, color: C.gold, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6 }}>💡 Minimum Monthly Billing to Resign Safely</div>
+              <div style={{ fontSize: 11, color: C.gold, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6 }}>
+                💡 {workspaceMode === "solo" ? "Minimum Monthly Billing to Resign Safely" : "Personal Cost Floor — Minimum Monthly Billing"}
+              </div>
               <div style={{ fontSize: 32, fontWeight: 700, color: C.gold, ...SF, marginBottom: 4 }}>₱{minBillingToResign.toLocaleString()}<span style={{ fontSize: 13, fontWeight: 400 }}>/mo</span></div>
-              <div style={{ fontSize: 12, color: C.textDim, ...SF }}>Covers personal burn + business overhead + {taxRate}% tax reserve, at {utilization}% utilization. This is the number to hit consistently before handing in notice.</div>
+              <div style={{ fontSize: 12, color: C.textDim, ...SF }}>
+                {workspaceMode === "solo"
+                  ? `Covers personal burn + business overhead + ${taxRate}% tax reserve, at ${utilization}% utilization. This is the number to hit consistently before handing in notice.`
+                  : `Your personal cost floor. Covers personal burn + overhead + ${taxRate}% tax at ${utilization}% utilization. Each partner should track their own floor separately.`}
+              </div>
             </div>
           </div>
         )}
