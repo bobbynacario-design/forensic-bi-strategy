@@ -190,6 +190,18 @@ const teamQuestions = [
   "What decisions need to be made together this week, and who holds the final call?",
   "What is currently blocked, and who specifically can unblock it?",
 ];
+const partnershipQuestions = [
+  "What did each partner commit to last week — and what was actually delivered vs. not?",
+  "Is there any misalignment on direction, priorities, or economics that needs to be addressed this week?",
+  "What decision requires both partners this week — and who holds the final call if we disagree?",
+  "What is one thing only a partner can unblock — and has it been explicitly asked for?",
+];
+const clientQuestions = [
+  "What deliverables are due this week — and are they on track?",
+  "What client dependencies are currently blocking progress — data access, approvals, feedback?",
+  "What has changed in scope since last week — and has it been documented?",
+  "What work is ready to invoice now, and what is holding the billing back?",
+];
 
 // ─── TRAINING ─────────────────────────────────────────────────────────────────
 const trainingResources = [
@@ -576,17 +588,24 @@ function Strategy() {
         .catch(err => console.error("saveWorkspaceMode error:", err));
     }
   };
-  const cycleMode = () => {
-    const modes = ["solo", "partnership", "client"];
-    saveWorkspaceMode(modes[(modes.indexOf(workspaceMode) + 1) % modes.length]);
-  };
   const modeLabel = workspaceMode === "solo" ? "👤 Solo" : workspaceMode === "partnership" ? "🤝 Partnership" : "💼 Client";
   const modeColor = workspaceMode === "solo" ? C.textMute : workspaceMode === "partnership" ? C.blue : C.purple;
   const isTeamMode = workspaceMode !== "solo";
+  const modeDefs = [
+    { id: "solo", label: "👤 Solo", color: C.textMute },
+    { id: "partnership", label: "🤝 Partnership", color: C.blue },
+    { id: "client", label: "💼 Client", color: C.purple },
+  ];
   const openSetupModal = () => {
-    setSetupName("Forensic BI Strategy");
-    setSetupDesc("Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.");
-    setSetupMode("solo");
+    const defaultName = workspaceMode === "client" ? "Forensic BI Engagement" : "Forensic BI Strategy";
+    const defaultDesc = workspaceMode === "partnership"
+      ? "Shared partnership workspace for Forensic BI consulting — roles, tasks, and coordination."
+      : workspaceMode === "client"
+      ? "Client engagement workspace — scope, deliverables, and team execution."
+      : "Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.";
+    setSetupName(defaultName);
+    setSetupDesc(defaultDesc);
+    setSetupMode(workspaceMode);
     setSetupModal(true);
     setRelinkModal(false);
     setCollabError(null);
@@ -602,7 +621,7 @@ function Strategy() {
     if (!newProspect.name.trim()) return;
     const p = { ...newProspect, id: Date.now() };
     const n = [...prospects, p]; setProspects(n); save("prospects", n);
-    setNewProspect({ name: "", company: "", stage: "prospect", note: "" }); setShowAddProspect(false);
+    setNewProspect({ name: "", company: "", stage: "prospect", note: "", owner: "" }); setShowAddProspect(false);
   };
   const moveProspect = (id, stage) => { const n = prospects.map(p => p.id === id ? { ...p, stage } : p); setProspects(n); save("prospects", n); };
   const deleteProspect = (id) => { const n = prospects.filter(p => p.id !== id); setProspects(n); save("prospects", n); };
@@ -627,13 +646,38 @@ function Strategy() {
   const gateClear = (phaseId) => gateCriteriaDone(phaseId) === gateTotal(phaseId);
   const track2Unlocked = gateClear("C");
   const topRisk = (() => {
-    if (runwayMonths > 0 && runwayMonths < 4) return { icon: "💸", label: "Critical runway", note: `Only ${runwayMonths} month${runwayMonths === 1 ? "" : "s"} of runway remaining. Adjust spending or accelerate first revenue before anything else.` };
-    if (enclaveLink.status !== "linked") return { icon: "🔗", label: "No collaboration space", note: "Your Enclave workspace is not linked. Create one to start coordinating with partners." };
-    if (prospects.length === 0) return { icon: "🎯", label: "Empty pipeline", note: "No prospects tracked. Add targets to the Pipeline tab before momentum stalls." };
     const mustDone = currentPhase.tasks.filter(t => t.priority === "Must" && completed[t.id]).length;
     const mustTotal = currentPhase.tasks.filter(t => t.priority === "Must").length;
-    if (mustTotal > 0 && mustDone / mustTotal < 0.3) return { icon: "⏱", label: `Phase ${currentPhaseId} behind`, note: `Under 30% of Phase ${currentPhaseId} Must tasks complete. Focus here before taking on anything new.` };
-    if (!gateClear(currentPhaseId)) return { icon: "🚧", label: `Gate ${currentPhaseId} not cleared`, note: `${gateCriteriaDone(currentPhaseId)}/${gateTotal(currentPhaseId)} gate criteria met. Clear this before advancing to the next phase.` };
+
+    if (workspaceMode === "solo") {
+      // Solo: personal transition economics first, collaboration is optional
+      if (runwayMonths > 0 && runwayMonths < 4) return { icon: "💸", label: "Critical runway", note: `Only ${runwayMonths} month${runwayMonths === 1 ? "" : "s"} of runway remaining. Adjust spending or accelerate first revenue before anything else.` };
+      if (prospects.length === 0) return { icon: "🎯", label: "Empty pipeline", note: "No prospects tracked. Add targets to the Pipeline tab before momentum stalls." };
+      if (mustTotal > 0 && mustDone / mustTotal < 0.3) return { icon: "⏱", label: `Phase ${currentPhaseId} behind`, note: `Under 30% of Phase ${currentPhaseId} Must tasks complete. Focus here before taking on anything new.` };
+      if (!gateClear(currentPhaseId)) return { icon: "🚧", label: `Gate ${currentPhaseId} not cleared`, note: `${gateCriteriaDone(currentPhaseId)}/${gateTotal(currentPhaseId)} gate criteria met. Clear this before advancing.` };
+      if (enclaveLink.status !== "linked") return { icon: "🔗", label: "No collaboration space", note: "Optional: link an Enclave workspace for notes, files, or future subcontractors." };
+      return risks[0];
+    }
+
+    if (workspaceMode === "partnership") {
+      // Partnership: governance and alignment risks first
+      if (runwayMonths > 0 && runwayMonths < 4) return { icon: "💸", label: "Critical shared runway", note: `Only ${runwayMonths} month${runwayMonths === 1 ? "" : "s"} of runway. Review partner capital contributions and shared burn before anything else.` };
+      if (enclaveLink.status !== "linked") return { icon: "🔗", label: "No shared workspace", note: "Your Enclave collaboration space is not linked. Partners cannot coordinate without a shared workspace." };
+      const unownedMust = currentPhase.tasks.filter(t => t.priority === "Must" && !completed[t.id] && !taskOwners[t.id]);
+      if (unownedMust.length > 0) return { icon: "👤", label: "Unassigned Must tasks", note: `${unownedMust.length} Must task${unownedMust.length > 1 ? "s have" : " has"} no owner. Go to the Roadmap tab and assign them to a partner.` };
+      if (prospects.length === 0) return { icon: "🎯", label: "Empty pipeline", note: "No prospects tracked. Assign deal owners and add targets to the Pipeline tab." };
+      if (mustTotal > 0 && mustDone / mustTotal < 0.3) return { icon: "⏱", label: `Phase ${currentPhaseId} behind`, note: `Under 30% of Phase ${currentPhaseId} Must tasks complete. Review ownership and unblock together.` };
+      if (!gateClear(currentPhaseId)) return { icon: "🚧", label: `Gate ${currentPhaseId} not cleared`, note: `${gateCriteriaDone(currentPhaseId)}/${gateTotal(currentPhaseId)} gate criteria met. Clear as a team before advancing.` };
+      return risks[0];
+    }
+
+    // Client mode: delivery execution risks
+    if (runwayMonths > 0 && runwayMonths < 4) return { icon: "💸", label: "Critical runway", note: `Only ${runwayMonths} month${runwayMonths === 1 ? "" : "s"} of runway. Review billing schedule and outstanding invoices immediately.` };
+    if (enclaveLink.status !== "linked") return { icon: "🔗", label: "No engagement workspace", note: "Link an Enclave project to coordinate your delivery team and track files and tasks." };
+    const unownedMust = currentPhase.tasks.filter(t => t.priority === "Must" && !completed[t.id] && !taskOwners[t.id]);
+    if (unownedMust.length > 0) return { icon: "👤", label: "Unassigned deliverables", note: `${unownedMust.length} Must task${unownedMust.length > 1 ? "s have" : " has"} no assigned team member. Assign ownership before the next client check-in.` };
+    if (prospects.filter(p => p.stage === "proposal").length > 0) return { icon: "📄", label: "Open proposals", note: `You have ${prospects.filter(p => p.stage === "proposal").length} proposal${prospects.filter(p => p.stage === "proposal").length > 1 ? "s" : ""} awaiting response. Follow up before momentum stalls.` };
+    if (mustTotal > 0 && mustDone / mustTotal < 0.3) return { icon: "⏱", label: "Engagement behind schedule", note: `Under 30% of Phase ${currentPhaseId} Must tasks complete. Review delivery timeline with the client.` };
     return risks[0];
   })();
 
@@ -757,9 +801,13 @@ function Strategy() {
               </div>
               <span style={{ fontSize: 11, color: C.gold, ...SF, whiteSpace: "nowrap" }}>{completedCount}/{totalTasks} tasks · {pct}%</span>
               <span style={{ fontSize: 11, color: C.green, ...SF, whiteSpace: "nowrap" }}>{achievedCount}/{milestonesList.length} milestones</span>
-              <button onClick={cycleMode} title="Click to switch workspace mode" style={{ background: `${modeColor}15`, border: `1px solid ${modeColor}50`, borderRadius: 6, padding: "3px 10px", cursor: "pointer", fontSize: 11, color: modeColor, ...SF, fontWeight: 700, transition: "all 0.2s", flexShrink: 0, lineHeight: 1.6 }}>
-                {modeLabel}
-              </button>
+              <div style={{ display: "flex", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 7, padding: 2, gap: 2, flexShrink: 0 }}>
+                {modeDefs.map(m => (
+                  <button key={m.id} onClick={() => saveWorkspaceMode(m.id)} style={{ background: workspaceMode === m.id ? `${m.color}20` : "transparent", border: workspaceMode === m.id ? `1px solid ${m.color}60` : "1px solid transparent", borderRadius: 5, padding: "2px 9px", cursor: "pointer", fontSize: 10, color: workspaceMode === m.id ? m.color : C.textMute, ...SF, fontWeight: workspaceMode === m.id ? 700 : 400, transition: "all 0.15s", whiteSpace: "nowrap" }}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
               <button onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 6, padding: "3px 9px", cursor: "pointer", fontSize: 13, color: C.textMid, ...SF, transition: "all 0.2s", flexShrink: 0, lineHeight: 1.6 }}>
                 {theme === 'dark' ? '☀️' : '🌙'}
               </button>
@@ -873,6 +921,12 @@ function Strategy() {
                       <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${C.red}`, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }} />
                       <span style={{ ...SF, fontSize: 13.5, color: C.textMid, lineHeight: 1.5, flex: 1 }}>{t.text}</span>
                       <PriorityBadge p={t.priority} />
+                      {isTeamMode && taskOwners[t.id] && (
+                        <span style={{ fontSize: 10, color: modeColor, background: `${modeColor}15`, border: `1px solid ${modeColor}30`, borderRadius: 10, padding: "1px 7px", ...SF, fontWeight: 600, flexShrink: 0 }}>👤 {taskOwners[t.id]}</span>
+                      )}
+                      {isTeamMode && !taskOwners[t.id] && (
+                        <span style={{ fontSize: 10, color: C.textMute, background: `${C.red}10`, border: `1px solid ${C.red}20`, borderRadius: 10, padding: "1px 7px", ...SF, flexShrink: 0 }}>unassigned</span>
+                      )}
                     </div>
                   ))
                 }
@@ -1176,19 +1230,25 @@ function Strategy() {
             </div>
 
             {/* Team Check-in — partnership/client mode only */}
-            {isTeamMode && (
-              <>
-                <div style={{ fontSize: 11, color: C.blue, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>🤝 Team Check-in</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
-                  {teamQuestions.map((q, i) => (
-                    <div key={`t${i}`} style={{ ...card, border: `1px solid ${C.blue}25` }}>
-                      <div style={{ fontSize: 12, color: C.blue, ...SF, marginBottom: 8, fontWeight: 600 }}>T{i + 1} — {q}</div>
-                      <textarea value={weekAnswers[`t${i}`] || ""} onChange={e => setWeekAnswers({ ...weekAnswers, [`t${i}`]: e.target.value })} placeholder="Partners, commitments, blockers..." rows={2} style={{ ...inputSt, resize: "vertical", lineHeight: 1.5 }} />
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+            {isTeamMode && (() => {
+              const tq = workspaceMode === "partnership" ? partnershipQuestions : clientQuestions;
+              const tLabel = workspaceMode === "partnership" ? "🤝 Partner Accountability" : "📋 Delivery Check-in";
+              const tPlaceholder = workspaceMode === "partnership" ? "Partner names, commitments, decisions..." : "Deliverables, blockers, scope changes...";
+              const tColor = modeColor;
+              return (
+                <>
+                  <div style={{ fontSize: 11, color: tColor, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>{tLabel}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+                    {tq.map((q, i) => (
+                      <div key={`t${i}`} style={{ ...card, border: `1px solid ${tColor}25` }}>
+                        <div style={{ fontSize: 12, color: tColor, ...SF, marginBottom: 8, fontWeight: 600 }}>T{i + 1} — {q}</div>
+                        <textarea value={weekAnswers[`t${i}`] || ""} onChange={e => setWeekAnswers({ ...weekAnswers, [`t${i}`]: e.target.value })} placeholder={tPlaceholder} rows={2} style={{ ...inputSt, resize: "vertical", lineHeight: 1.5 }} />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
 
             {/* Reflection Questions */}
             <div style={{ fontSize: 11, color: C.gold, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>🪞 Reflect</div>
