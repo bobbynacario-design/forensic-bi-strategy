@@ -1,0 +1,19 @@
+{
+  "name": "Forensic BI — Operating System",
+  "short_name": "Forensic BI",
+  "description": "Building a Forensic BI Practice — Operating System",
+  "start_url": "/forensic-bi-strategy/",
+  "scope": "/forensic-bi-strategy/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D0F14",
+  "theme_color": "#0D0F14",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

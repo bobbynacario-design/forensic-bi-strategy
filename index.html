@@ -2,8 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Forensic BI — Operating System v5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Forensic BI — Operating System</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0D0F14" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+
+  <!-- iOS / Apple -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forensic BI" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+
+  <!-- Android / Chrome -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Forensic BI" />
 
   <!-- React 18 + Babel (no build tools needed) -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -66,6 +83,16 @@
     ReactDOM.createRoot(document.getElementById('root')).render(
       React.createElement(Strategy)
     );
+  </script>
+
+  <!-- Register service worker for PWA / offline -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/forensic-bi-strategy/sw.js')
+          .catch(function(err) { console.log('SW registration failed:', err); });
+      });
+    }
   </script>
 </body>
 </html>
