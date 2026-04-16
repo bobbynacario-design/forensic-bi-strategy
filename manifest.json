@@ -1,7 +1,7 @@
 {
-  "name": "Forensic BI — Operating System",
-  "short_name": "Forensic BI",
-  "description": "Building a Forensic BI Practice — Operating System",
+  "name": "Praxis — Operating System",
+  "short_name": "Praxis",
+  "description": "Building a Forensic BI Practice — Praxis Operating System",
   "start_url": "/forensic-bi-strategy/",
   "scope": "/forensic-bi-strategy/",
   "display": "standalone",

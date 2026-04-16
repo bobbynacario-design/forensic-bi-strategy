@@ -1128,7 +1128,7 @@ function Strategy() {
     { id: "milestones", label: "🎉 Milestones" },
   ];
 
-  if (!loaded) return <div style={{ background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: C.gold, ...SF }}>Loading your operating system...</div>;
+  if (!loaded) return <div style={{ background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: C.gold, ...SF }}>Loading Praxis...</div>;
 
   return (
     <div style={{ ...SF, background: C.bg, minHeight: "100vh", width: "100%", color: C.text }}>
@@ -1137,8 +1137,8 @@ function Strategy() {
       <div className="hp" style={{ background: headerBg, borderBottom: `1px solid ${C.border}` }}>
         <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 20 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 6, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
-            <h1 style={{ margin: "0 0 10px", fontSize: 28, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Building a Forensic BI Practice — <span style={{ color: C.gold }}>Operating System</span></h1>
+            <div style={{ fontSize: 11, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 6, ...SF }}>Praxis · Forensic BI Operating System · v5</div>
+            <h1 style={{ margin: "0 0 10px", fontSize: 28, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Praxis — <span style={{ color: C.gold }}>Forensic BI Operating System</span></h1>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
               <div style={{ flex: 1, height: 4, background: C.borderSub, borderRadius: 2, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${C.gold},#E8C98E)`, borderRadius: 2, transition: "width 0.4s" }} />

@@ -1,4 +1,4 @@
-const CACHE = 'fba-v5';
+const CACHE = 'praxis-v1';
 const SHELL = [
   '/forensic-bi-strategy/',
   '/forensic-bi-strategy/index.html',
