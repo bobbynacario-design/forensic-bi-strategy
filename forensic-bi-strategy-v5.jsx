@@ -184,6 +184,12 @@ const reflectionQuestions = [
   "Am I staying on my financial runway plan? Any adjustments needed?",
   "What would a recognized forensic expert in PH do next week that I am not yet doing?",
 ];
+const teamQuestions = [
+  "What did each partner or collaborator commit to last week — and what was actually delivered?",
+  "What is each person's top priority this week?",
+  "What decisions need to be made together this week, and who holds the final call?",
+  "What is currently blocked, and who specifically can unblock it?",
+];
 
 // ─── TRAINING ─────────────────────────────────────────────────────────────────
 const trainingResources = [
@@ -372,6 +378,10 @@ function Strategy() {
   const [collabError, setCollabError] = useState(null);
   const [relinkModal, setRelinkModal] = useState(false);
   const [relinkId, setRelinkId] = useState("");
+  const [setupModal, setSetupModal] = useState(false);
+  const [setupName, setSetupName] = useState("Forensic BI Strategy");
+  const [setupDesc, setSetupDesc] = useState("Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.");
+  const [setupMode, setSetupMode] = useState("solo");
 
   // ── Theme ─────────────────────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch { return 'dark'; } });
@@ -512,17 +522,21 @@ function Strategy() {
         return;
       }
 
+      setSetupModal(false);
+
       // Store roadmap metadata on the user doc (same collection, no new rules needed)
-      // originRoadmapId = fbUser.uid — a real Firestore document ID (users/{uid})
       await db.doc(`users/${fbUser.uid}`).set({
-        roadmapApp:  "forensic-bi-strategy",
-        roadmapName: displayName,
+        roadmapApp:       "forensic-bi-strategy",
+        roadmapName:      displayName,
+        roadmapWorkspace: setupName,
+        roadmapMode:      setupMode,
         roadmapUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
       const docRef = await db.collection("projects").add({
-        name:            "Forensic BI Strategy",
-        description:     "Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.",
+        name:            setupName || "Forensic BI Strategy",
+        description:     setupDesc || "Collaboration space for Forensic BI consulting strategy.",
+        workspaceMode:   setupMode,
         status:          "active",
         createdBy:       fbUser.uid,
         createdByName:   displayName,
@@ -530,7 +544,6 @@ function Strategy() {
         updatedAt:       firebase.firestore.FieldValue.serverTimestamp(),
         memberIds:       [fbUser.uid],
         memberNames:     { [fbUser.uid]: displayName },
-        // Bridge fields — originRoadmapId is fbUser.uid, the real users/{uid} doc ID
         originApp:       "roadmap",
         originRoadmapId: fbUser.uid,
       });
@@ -547,7 +560,15 @@ function Strategy() {
     }
   };
 
-  const relinkSpace = () => { setRelinkId(""); setRelinkModal(true); };
+  const relinkSpace = () => { setRelinkId(""); setRelinkModal(true); setSetupModal(false); };
+  const openSetupModal = () => {
+    setSetupName("Forensic BI Strategy");
+    setSetupDesc("Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.");
+    setSetupMode("solo");
+    setSetupModal(true);
+    setRelinkModal(false);
+    setCollabError(null);
+  };
   const confirmRelink = () => {
     if (!relinkId.trim()) return;
     setRelinkModal(false);
@@ -583,6 +604,16 @@ function Strategy() {
   const gateTotal = (phaseId) => { const ph = phases.find(p => p.id === phaseId); return ph ? ph.gate.criteria.length : 0; };
   const gateClear = (phaseId) => gateCriteriaDone(phaseId) === gateTotal(phaseId);
   const track2Unlocked = gateClear("C");
+  const topRisk = (() => {
+    if (runwayMonths > 0 && runwayMonths < 4) return { icon: "💸", label: "Critical runway", note: `Only ${runwayMonths} month${runwayMonths === 1 ? "" : "s"} of runway remaining. Adjust spending or accelerate first revenue before anything else.` };
+    if (enclaveLink.status !== "linked") return { icon: "🔗", label: "No collaboration space", note: "Your Enclave workspace is not linked. Create one to start coordinating with partners." };
+    if (prospects.length === 0) return { icon: "🎯", label: "Empty pipeline", note: "No prospects tracked. Add targets to the Pipeline tab before momentum stalls." };
+    const mustDone = currentPhase.tasks.filter(t => t.priority === "Must" && completed[t.id]).length;
+    const mustTotal = currentPhase.tasks.filter(t => t.priority === "Must").length;
+    if (mustTotal > 0 && mustDone / mustTotal < 0.3) return { icon: "⏱", label: `Phase ${currentPhaseId} behind`, note: `Under 30% of Phase ${currentPhaseId} Must tasks complete. Focus here before taking on anything new.` };
+    if (!gateClear(currentPhaseId)) return { icon: "🚧", label: `Gate ${currentPhaseId} not cleared`, note: `${gateCriteriaDone(currentPhaseId)}/${gateTotal(currentPhaseId)} gate criteria met. Clear this before advancing to the next phase.` };
+    return risks[0];
+  })();
 
   // ── Inject CSS ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -687,7 +718,7 @@ function Strategy() {
         <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", gap: 20 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 9, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 5, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
-            <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Going Independent in the Philippines — <span style={{ color: C.gold }}>CPA · CIA · Forensic BI</span></h1>
+            <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Building a Forensic BI Practice — <span style={{ color: C.gold }}>CPA · CIA · Operating System</span></h1>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
               <div style={{ flex: 1, height: 4, background: C.borderSub, borderRadius: 2, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${C.gold},#E8C98E)`, borderRadius: 2, transition: "width 0.4s" }} />
@@ -854,14 +885,14 @@ function Strategy() {
                           </>
                         ) : colStatus === "broken" ? (
                           <>
-                            <button onClick={createCollaborationSpace} disabled={collabCreating} style={{ ...btnBase, background: C.gold, color: "#0D0F14", opacity: collabCreating ? 0.5 : 1 }}>
+                            <button onClick={openSetupModal} disabled={collabCreating} style={{ ...btnBase, background: C.gold, color: "#0D0F14", opacity: collabCreating ? 0.5 : 1 }}>
                               {collabCreating ? "Creating…" : "Create New Space"}
                             </button>
                             <button onClick={relinkSpace} disabled={collabCreating} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, opacity: collabCreating ? 0.4 : 1 }}>Relink Existing</button>
                           </>
                         ) : (
                           <>
-                            <button onClick={createCollaborationSpace} disabled={collabCreating} style={{ ...btnBase, background: C.blue, color: "#0D0F14", opacity: collabCreating ? 0.5 : 1 }}>
+                            <button onClick={openSetupModal} disabled={collabCreating} style={{ ...btnBase, background: C.blue, color: "#0D0F14", opacity: collabCreating ? 0.5 : 1 }}>
                               {collabCreating ? "Creating…" : "Create Collaboration Space"}
                             </button>
                             <button onClick={relinkSpace} disabled={collabCreating} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, opacity: collabCreating ? 0.4 : 1 }}>Relink Existing</button>
@@ -872,6 +903,35 @@ function Strategy() {
                         )}
                       </div>
                     </div>
+                    {setupModal && (
+                      <div style={{ marginTop: 14, padding: "16px 18px", borderRadius: 8, background: C.bg, border: `1px solid ${C.border}` }}>
+                        <div style={{ fontSize: 11, color: C.gold, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Configure Collaboration Space</div>
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 4 }}>Workspace name</div>
+                          <input value={setupName} onChange={e => setSetupName(e.target.value)} placeholder="e.g. Forensic BI Strategy" style={{ ...inputSt, fontSize: 13 }} />
+                        </div>
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 4 }}>Description <span style={{ color: C.textMute, fontWeight: 400 }}>(optional)</span></div>
+                          <textarea value={setupDesc} onChange={e => setSetupDesc(e.target.value)} rows={2} style={{ ...inputSt, resize: "vertical", fontSize: 12, lineHeight: 1.5 }} />
+                        </div>
+                        <div style={{ marginBottom: 16 }}>
+                          <div style={{ fontSize: 11, color: C.textMute, ...SF, marginBottom: 8 }}>Workspace mode</div>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            {[{ id: "solo", label: "Solo", desc: "just me" }, { id: "partnership", label: "Partnership", desc: "2–3 partners" }, { id: "client", label: "Client Engagement", desc: "delivery team" }].map(m => (
+                              <button key={m.id} onClick={() => setSetupMode(m.id)} style={{ padding: "6px 13px", borderRadius: 6, border: setupMode === m.id ? `1.5px solid ${C.gold}` : `1.5px solid ${C.border}`, background: setupMode === m.id ? `${C.gold}15` : "transparent", color: setupMode === m.id ? C.gold : C.textMute, cursor: "pointer", fontSize: 12, ...SF, fontWeight: setupMode === m.id ? 700 : 400, transition: "all 0.15s" }}>
+                                {m.label} <span style={{ fontSize: 10, fontWeight: 400, opacity: 0.7 }}>({m.desc})</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button onClick={createCollaborationSpace} disabled={!setupName.trim() || collabCreating} style={{ ...btnBase, background: C.gold, color: "#0D0F14", opacity: setupName.trim() && !collabCreating ? 1 : 0.4, flexShrink: 0 }}>
+                            {collabCreating ? "Creating…" : "Create Space →"}
+                          </button>
+                          <button onClick={() => setSetupModal(false)} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, flexShrink: 0 }}>Cancel</button>
+                        </div>
+                      </div>
+                    )}
                     {relinkModal && (
                       <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: C.bg, border: `1px solid ${C.border}` }}>
                         <div style={{ fontSize: 11, color: C.textDim, ...SF, marginBottom: 8 }}>Paste an existing Enclave project ID to relink:</div>
@@ -914,10 +974,10 @@ function Strategy() {
                 </div>
 
                 <div style={{ ...card, border: `1px solid ${C.red}30` }}>
-                  <div style={{ fontSize: 10, color: C.red, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 10 }}>⚠ Top Risk</div>
-                  <div style={{ fontSize: 20, marginBottom: 6 }}>{risks[0].icon}</div>
-                  <div style={{ fontSize: 13, color: "#E8C98E", ...SF, fontWeight: 600, marginBottom: 4 }}>{risks[0].label}</div>
-                  <div style={{ fontSize: 12, color: C.textDim, ...SF, lineHeight: 1.5 }}>{risks[0].note}</div>
+                  <div style={{ fontSize: 10, color: C.red, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 10 }}>⚠ Top Risk Now</div>
+                  <div style={{ fontSize: 20, marginBottom: 6 }}>{topRisk.icon}</div>
+                  <div style={{ fontSize: 13, color: C.gold, ...SF, fontWeight: 600, marginBottom: 4 }}>{topRisk.label}</div>
+                  <div style={{ fontSize: 12, color: C.textDim, ...SF, lineHeight: 1.5 }}>{topRisk.note}</div>
                 </div>
               </div>
             </div>
@@ -1050,12 +1110,23 @@ function Strategy() {
             </div>
 
             {/* Decision Questions */}
-            <div style={{ fontSize: 11, color: C.red, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>⚡ Decisions First</div>
+            <div style={{ fontSize: 11, color: C.red, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>⚡ My Priorities</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
               {decisionQuestions.map((q, i) => (
                 <div key={`d${i}`} style={{ ...card, border: `1px solid ${C.red}25` }}>
                   <div style={{ fontSize: 12, color: C.red, ...SF, marginBottom: 8, fontWeight: 600 }}>D{i + 1} — {q}</div>
                   <textarea value={weekAnswers[`d${i}`] || ""} onChange={e => setWeekAnswers({ ...weekAnswers, [`d${i}`]: e.target.value })} placeholder="Be specific — names, offers, blockers..." rows={2} style={{ ...inputSt, resize: "vertical", lineHeight: 1.5 }} />
+                </div>
+              ))}
+            </div>
+
+            {/* Team Check-in */}
+            <div style={{ fontSize: 11, color: C.blue, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>🤝 Team Check-in</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+              {teamQuestions.map((q, i) => (
+                <div key={`t${i}`} style={{ ...card, border: `1px solid ${C.blue}25` }}>
+                  <div style={{ fontSize: 12, color: C.blue, ...SF, marginBottom: 8, fontWeight: 600 }}>T{i + 1} — {q}</div>
+                  <textarea value={weekAnswers[`t${i}`] || ""} onChange={e => setWeekAnswers({ ...weekAnswers, [`t${i}`]: e.target.value })} placeholder="Partners, commitments, blockers..." rows={2} style={{ ...inputSt, resize: "vertical", lineHeight: 1.5 }} />
                 </div>
               ))}
             </div>
