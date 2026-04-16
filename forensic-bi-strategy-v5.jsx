@@ -512,13 +512,12 @@ function Strategy() {
         return;
       }
 
-      // Fix 2 — Create / upsert a real roadmap document so originRoadmapId is a proper Firestore doc ID
-      const roadmapDocRef = db.collection("roadmaps").doc(fbUser.uid);
-      await roadmapDocRef.set({
-        ownerUid:  fbUser.uid,
-        ownerName: displayName,
-        app:       "forensic-bi-strategy",
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      // Store roadmap metadata on the user doc (same collection, no new rules needed)
+      // originRoadmapId = fbUser.uid — a real Firestore document ID (users/{uid})
+      await db.doc(`users/${fbUser.uid}`).set({
+        roadmapApp:  "forensic-bi-strategy",
+        roadmapName: displayName,
+        roadmapUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
       const docRef = await db.collection("projects").add({
@@ -531,9 +530,9 @@ function Strategy() {
         updatedAt:       firebase.firestore.FieldValue.serverTimestamp(),
         memberIds:       [fbUser.uid],
         memberNames:     { [fbUser.uid]: displayName },
-        // Bridge fields — real Firestore doc reference back to the roadmap
+        // Bridge fields — originRoadmapId is fbUser.uid, the real users/{uid} doc ID
         originApp:       "roadmap",
-        originRoadmapId: roadmapDocRef.id,
+        originRoadmapId: fbUser.uid,
       });
 
       saveEnclaveLink({ projectId: docRef.id, status: "linked", lastChecked: Date.now() });
