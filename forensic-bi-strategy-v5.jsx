@@ -704,8 +704,8 @@ function Strategy() {
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch { return 'dark'; } });
   // Shadow module-level C with the active theme palette — used by all component rendering
   const C = theme === 'dark' ? DARK_C : LIGHT_C; // eslint-disable-line no-shadow
-  const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "20px 24px" };
-  const inputSt = { background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, color: C.text, padding: "8px 12px", fontSize: 14, ...SF, width: "100%", boxSizing: "border-box", outline: "none" };
+  const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: "24px 28px" };
+  const inputSt = { background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, color: C.text, padding: "10px 14px", fontSize: 15, ...SF, width: "100%", boxSizing: "border-box", outline: "none" };
   const toggleTheme = () => { const n = theme === 'dark' ? 'light' : 'dark'; setTheme(n); try { localStorage.setItem('fba_theme', n); } catch {} };
   const headerBg = theme === 'dark' ? 'linear-gradient(135deg,#0D0F14 0%,#1a1f2e 100%)' : 'linear-gradient(135deg,#F0ECE7 0%,#EAE5DE 100%)';
 
@@ -1035,9 +1035,9 @@ function Strategy() {
       .tab-bar{display:flex;gap:1px;border-bottom:1px solid ${C.border};flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
       .tab-bar::-webkit-scrollbar{display:none}
       .sub-tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
-      .pp{padding:20px 32px;width:100%;box-sizing:border-box}
-      .hp{padding:22px 32px 18px;width:100%;box-sizing:border-box}
-      @media(max-width:640px){.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.pp{padding:14px 16px!important}.hp{padding:16px 16px 14px!important}}
+      .pp{padding:28px 48px;width:100%;box-sizing:border-box}
+      .hp{padding:28px 48px 22px;width:100%;box-sizing:border-box}
+      @media(max-width:640px){.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.pp{padding:16px 18px!important}.hp{padding:18px 18px 14px!important}}
       .task-row:hover{border-color:${hoverBorder}!important}
       .prospect-card:hover{border-color:${hoverBorder}!important}
     `;
@@ -1137,8 +1137,8 @@ function Strategy() {
       <div className="hp" style={{ background: headerBg, borderBottom: `1px solid ${C.border}` }}>
         <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 20 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 9, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 5, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
-            <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Building a Forensic BI Practice — <span style={{ color: C.gold }}>Operating System</span></h1>
+            <div style={{ fontSize: 11, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 6, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
+            <h1 style={{ margin: "0 0 10px", fontSize: 28, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Building a Forensic BI Practice — <span style={{ color: C.gold }}>Operating System</span></h1>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
               <div style={{ flex: 1, height: 4, background: C.borderSub, borderRadius: 2, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${C.gold},#E8C98E)`, borderRadius: 2, transition: "width 0.4s" }} />
@@ -1189,7 +1189,7 @@ function Strategy() {
         {/* TABS */}
         <div className="tab-bar" style={{ marginBottom: 24 }}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: "transparent", border: "none", borderBottom: activeTab === t.id ? `2px solid ${C.gold}` : "2px solid transparent", color: activeTab === t.id ? C.gold : C.textMute, padding: "8px 11px", cursor: "pointer", fontSize: 11, ...SF, marginBottom: -1, transition: "all 0.15s", whiteSpace: "nowrap" }}>
+            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: "transparent", border: "none", borderBottom: activeTab === t.id ? `2px solid ${C.gold}` : "2px solid transparent", color: activeTab === t.id ? C.gold : C.textMute, padding: "11px 18px", cursor: "pointer", fontSize: 14, ...SF, marginBottom: -1, transition: "all 0.15s", whiteSpace: "nowrap" }}>
               {t.label}{t.id === "track2" && !track2Unlocked ? " 🔒" : ""}
             </button>
           ))}
