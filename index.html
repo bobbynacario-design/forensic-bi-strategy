@@ -29,9 +29,9 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0D0F14; }
+    html, body { width: 100%; min-height: 100vh; background: #0D0F14; }
     .light body, body.light { background: #F5F1EC; }
-    #root { min-height: 100vh; }
+    #root { width: 100%; min-height: 100vh; }
   </style>
 </head>
 <body>
@@ -59,7 +59,7 @@
   </script>
 
   <!-- Load and transpile the app -->
-  <script type="text/babel" src="forensic-bi-strategy-v5.jsx?v=2"></script>
+  <script type="text/babel" src="forensic-bi-strategy-v5.jsx?v=3"></script>
 
   <!-- Mount after the component is defined -->
   <script type="text/babel">

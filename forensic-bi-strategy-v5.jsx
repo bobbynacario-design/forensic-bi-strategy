@@ -1135,7 +1135,7 @@ function Strategy() {
 
       {/* HEADER */}
       <div className="hp" style={{ background: headerBg, borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ maxWidth: "100%", display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 20 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 9, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 5, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
             <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Building a Forensic BI Practice — <span style={{ color: C.gold }}>Operating System</span></h1>
@@ -1184,7 +1184,7 @@ function Strategy() {
         </div>
       </div>
 
-      <div className="pp" style={{ maxWidth: "100%" }}>
+      <div className="pp" style={{ width: "100%" }}>
 
         {/* TABS */}
         <div className="tab-bar" style={{ marginBottom: 24 }}>
