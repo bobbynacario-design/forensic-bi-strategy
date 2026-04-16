@@ -362,8 +362,12 @@ function Strategy() {
 
   // ── Pipeline ──────────────────────────────────────────────────────────────────
   const [prospects, setProspects] = useState([]);
-  const [newProspect, setNewProspect] = useState({ name: "", company: "", stage: "prospect", note: "" });
+  const [newProspect, setNewProspect] = useState({ name: "", company: "", stage: "prospect", note: "", owner: "" });
   const [showAddProspect, setShowAddProspect] = useState(false);
+
+  // ── Workspace mode ────────────────────────────────────────────────────────────
+  const [workspaceMode, setWorkspaceMode] = useState("solo");
+  const [taskOwners, setTaskOwners] = useState({});
 
   // ── Milestones ────────────────────────────────────────────────────────────────
   const [achieved, setAchieved] = useState({});
@@ -407,6 +411,7 @@ function Strategy() {
       await tryLoad("milestoneDate", setMilestoneDate);
       await tryLoad("savedReviews", setSavedReviews);
       await tryLoad("prospects", setProspects);
+      await tryLoad("taskOwners", setTaskOwners);
       // enclaveLink is loaded from Firestore in the auth listener, not localStorage
       try {
         const r = await window.storage.get("financial");
@@ -426,6 +431,7 @@ function Strategy() {
         try {
           const snap = await firebase.firestore().doc(`users/${user.uid}`).get();
           if (snap.exists && snap.data().fbaLink) setEnclaveLink(snap.data().fbaLink);
+          if (snap.exists && snap.data().roadmapMode) setWorkspaceMode(snap.data().roadmapMode);
         } catch (err) { console.error("Load fbaLink from Firestore error:", err); }
       } else {
         // User signed out — clear the link
@@ -561,6 +567,22 @@ function Strategy() {
   };
 
   const relinkSpace = () => { setRelinkId(""); setRelinkModal(true); setSetupModal(false); };
+
+  const saveWorkspaceMode = (mode) => {
+    setWorkspaceMode(mode);
+    if (fbUser) {
+      firebase.firestore().doc(`users/${fbUser.uid}`)
+        .set({ roadmapMode: mode }, { merge: true })
+        .catch(err => console.error("saveWorkspaceMode error:", err));
+    }
+  };
+  const cycleMode = () => {
+    const modes = ["solo", "partnership", "client"];
+    saveWorkspaceMode(modes[(modes.indexOf(workspaceMode) + 1) % modes.length]);
+  };
+  const modeLabel = workspaceMode === "solo" ? "👤 Solo" : workspaceMode === "partnership" ? "🤝 Partnership" : "💼 Client";
+  const modeColor = workspaceMode === "solo" ? C.textMute : workspaceMode === "partnership" ? C.blue : C.purple;
+  const isTeamMode = workspaceMode !== "solo";
   const openSetupModal = () => {
     setSetupName("Forensic BI Strategy");
     setSetupDesc("Collaboration space for Forensic BI consulting strategy — phases, tasks, and team coordination.");
@@ -643,6 +665,7 @@ function Strategy() {
 
   const TaskList = ({ tasks, color }) => tasks.map(task => {
     const done = completed[task.id];
+    const owner = taskOwners[task.id] || "";
     return (
       <div key={task.id} className="task-row" onClick={() => toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${color}08` : C.bg, border: `1px solid ${done ? color + "35" : C.borderSub}`, cursor: "pointer", transition: "all 0.15s", marginBottom: 7 }}>
         <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? color : "#3a3f50"}`, background: done ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
@@ -650,6 +673,15 @@ function Strategy() {
         </div>
         <span style={{ ...SF, fontSize: 13.5, color: done ? "#6a7080" : C.textMid, textDecoration: done ? "line-through" : "none", lineHeight: 1.5, flex: 1 }}>{task.text}</span>
         {task.priority && <PriorityBadge p={task.priority} />}
+        {isTeamMode && (
+          <input
+            value={owner}
+            onChange={e => { e.stopPropagation(); const n = { ...taskOwners, [task.id]: e.target.value }; setTaskOwners(n); save("taskOwners", n); }}
+            onClick={e => e.stopPropagation()}
+            placeholder="Owner"
+            style={{ background: owner ? `${modeColor}12` : C.bg, border: `1px solid ${owner ? modeColor + "50" : C.border}`, borderRadius: 5, color: owner ? modeColor : C.textMute, padding: "2px 7px", fontSize: 11, ...SF, width: 80, flexShrink: 0, outline: "none" }}
+          />
+        )}
       </div>
     );
   });
@@ -725,6 +757,9 @@ function Strategy() {
               </div>
               <span style={{ fontSize: 11, color: C.gold, ...SF, whiteSpace: "nowrap" }}>{completedCount}/{totalTasks} tasks · {pct}%</span>
               <span style={{ fontSize: 11, color: C.green, ...SF, whiteSpace: "nowrap" }}>{achievedCount}/{milestonesList.length} milestones</span>
+              <button onClick={cycleMode} title="Click to switch workspace mode" style={{ background: `${modeColor}15`, border: `1px solid ${modeColor}50`, borderRadius: 6, padding: "3px 10px", cursor: "pointer", fontSize: 11, color: modeColor, ...SF, fontWeight: 700, transition: "all 0.2s", flexShrink: 0, lineHeight: 1.6 }}>
+                {modeLabel}
+              </button>
               <button onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 6, padding: "3px 9px", cursor: "pointer", fontSize: 13, color: C.textMid, ...SF, transition: "all 0.2s", flexShrink: 0, lineHeight: 1.6 }}>
                 {theme === 'dark' ? '☀️' : '🌙'}
               </button>
@@ -820,7 +855,17 @@ function Strategy() {
 
               {/* Top 3 Must Tasks */}
               <div style={{ ...card, marginBottom: 16 }}>
-                <div style={{ fontSize: 10, color: C.red, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>⚡ Top 3 Actions — Phase {currentPhaseId}</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, color: C.red, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                    {isTeamMode ? "🤝 Team Top Actions — Phase " : "⚡ Top 3 Actions — Phase "}{currentPhaseId}
+                  </div>
+                  {isTeamMode && <span style={{ fontSize: 10, color: modeColor, ...SF, background: `${modeColor}15`, border: `1px solid ${modeColor}30`, borderRadius: 4, padding: "2px 8px" }}>{modeLabel}</span>}
+                </div>
+                {isTeamMode && (
+                  <div style={{ fontSize: 12, color: C.textDim, ...SF, marginBottom: 12, padding: "8px 12px", background: `${modeColor}08`, borderRadius: 6, border: `1px solid ${modeColor}20` }}>
+                    {workspaceMode === "partnership" ? "Each task below can be assigned to a partner. Go to the Roadmap tab to set owners." : "Assign tasks to delivery team members in the Roadmap tab."}
+                  </div>
+                )}
                 {topMustTasks.length === 0
                   ? <div style={{ color: C.green, fontSize: 13, ...SF }}>✓ All Must tasks in this phase are complete. Check your gate criteria below, then advance.</div>
                   : topMustTasks.map(t => (
@@ -1039,6 +1084,12 @@ function Strategy() {
                     <div style={{ fontSize: 11, color: C.textDim, ...SF, marginBottom: 4 }}>Note</div>
                     <input value={newProspect.note} onChange={e => setNewProspect({ ...newProspect, note: e.target.value })} placeholder="How you found them, context..." style={inputSt} />
                   </div>
+                  {isTeamMode && (
+                    <div>
+                      <div style={{ fontSize: 11, color: C.textDim, ...SF, marginBottom: 4 }}>Deal Owner</div>
+                      <input value={newProspect.owner || ""} onChange={e => setNewProspect({ ...newProspect, owner: e.target.value })} placeholder="Who owns this prospect?" style={inputSt} />
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={addProspect} style={{ background: C.gold, border: "none", color: "#0D0F14", borderRadius: 6, padding: "8px 20px", cursor: "pointer", fontSize: 13, ...SF, fontWeight: 700 }}>Add</button>
@@ -1078,7 +1129,10 @@ function Strategy() {
                       <div key={p.id} className="prospect-card" style={{ background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${stage.color}`, borderRadius: 8, padding: "12px 16px", marginBottom: 8, transition: "border-color 0.15s" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 14, color: C.text, ...SF, fontWeight: 600 }}>{p.name}</div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <div style={{ fontSize: 14, color: C.text, ...SF, fontWeight: 600 }}>{p.name}</div>
+                              {isTeamMode && p.owner && <span style={{ fontSize: 10, color: modeColor, background: `${modeColor}15`, border: `1px solid ${modeColor}30`, borderRadius: 10, padding: "1px 7px", ...SF, fontWeight: 600 }}>👤 {p.owner}</span>}
+                            </div>
                             {p.company && <div style={{ fontSize: 12, color: C.textDim, ...SF, marginTop: 2 }}>{p.company}</div>}
                             {p.note && <div style={{ fontSize: 12, color: C.textMute, ...SF, marginTop: 4, fontStyle: "italic" }}>{p.note}</div>}
                           </div>
@@ -1121,16 +1175,20 @@ function Strategy() {
               ))}
             </div>
 
-            {/* Team Check-in */}
-            <div style={{ fontSize: 11, color: C.blue, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>🤝 Team Check-in</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
-              {teamQuestions.map((q, i) => (
-                <div key={`t${i}`} style={{ ...card, border: `1px solid ${C.blue}25` }}>
-                  <div style={{ fontSize: 12, color: C.blue, ...SF, marginBottom: 8, fontWeight: 600 }}>T{i + 1} — {q}</div>
-                  <textarea value={weekAnswers[`t${i}`] || ""} onChange={e => setWeekAnswers({ ...weekAnswers, [`t${i}`]: e.target.value })} placeholder="Partners, commitments, blockers..." rows={2} style={{ ...inputSt, resize: "vertical", lineHeight: 1.5 }} />
+            {/* Team Check-in — partnership/client mode only */}
+            {isTeamMode && (
+              <>
+                <div style={{ fontSize: 11, color: C.blue, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>🤝 Team Check-in</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+                  {teamQuestions.map((q, i) => (
+                    <div key={`t${i}`} style={{ ...card, border: `1px solid ${C.blue}25` }}>
+                      <div style={{ fontSize: 12, color: C.blue, ...SF, marginBottom: 8, fontWeight: 600 }}>T{i + 1} — {q}</div>
+                      <textarea value={weekAnswers[`t${i}`] || ""} onChange={e => setWeekAnswers({ ...weekAnswers, [`t${i}`]: e.target.value })} placeholder="Partners, commitments, blockers..." rows={2} style={{ ...inputSt, resize: "vertical", lineHeight: 1.5 }} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
 
             {/* Reflection Questions */}
             <div style={{ fontSize: 11, color: C.gold, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>🪞 Reflect</div>
