@@ -882,6 +882,7 @@ function Strategy() {
                           <>
                             <button onClick={openInEnclave} style={{ ...btnBase, background: C.green, color: "#0D0F14" }}>Open in Enclave →</button>
                             <button onClick={() => checkLinkedProject(enclaveLink.projectId)} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute }}>↻ Refresh</button>
+                            <button onClick={relinkSpace} style={{ ...btnBase, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute }}>↻ Relink</button>
                           </>
                         ) : colStatus === "broken" ? (
                           <>
