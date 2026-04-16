@@ -1035,8 +1035,8 @@ function Strategy() {
       .tab-bar{display:flex;gap:1px;border-bottom:1px solid ${C.border};flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
       .tab-bar::-webkit-scrollbar{display:none}
       .sub-tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
-      .pp{padding:20px 32px}
-      .hp{padding:22px 32px 18px}
+      .pp{padding:20px 32px;width:100%;box-sizing:border-box}
+      .hp{padding:22px 32px 18px;width:100%;box-sizing:border-box}
       @media(max-width:640px){.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.pp{padding:14px 16px!important}.hp{padding:16px 16px 14px!important}}
       .task-row:hover{border-color:${hoverBorder}!important}
       .prospect-card:hover{border-color:${hoverBorder}!important}
@@ -1131,7 +1131,7 @@ function Strategy() {
   if (!loaded) return <div style={{ background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: C.gold, ...SF }}>Loading your operating system...</div>;
 
   return (
-    <div style={{ ...SF, background: C.bg, minHeight: "100vh", color: C.text }}>
+    <div style={{ ...SF, background: C.bg, minHeight: "100vh", width: "100%", color: C.text }}>
 
       {/* HEADER */}
       <div className="hp" style={{ background: headerBg, borderBottom: `1px solid ${C.border}` }}>
