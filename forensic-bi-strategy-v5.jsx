@@ -1135,10 +1135,10 @@ function Strategy() {
 
       {/* HEADER */}
       <div className="hp" style={{ background: headerBg, borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ maxWidth: 1800, margin: "0 auto", display: "flex", alignItems: "center", gap: 20 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 9, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", marginBottom: 5, ...SF }}>Forensic BI Consulting · Operating System · v5</div>
-            <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Building a Forensic BI Practice — <span style={{ color: C.gold }}>CPA · CIA · Operating System</span></h1>
+            <h1 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 400, color: C.text, lineHeight: 1.3 }}>Building a Forensic BI Practice — <span style={{ color: C.gold }}>Operating System</span></h1>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
               <div style={{ flex: 1, height: 4, background: C.borderSub, borderRadius: 2, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${C.gold},#E8C98E)`, borderRadius: 2, transition: "width 0.4s" }} />
@@ -1184,7 +1184,7 @@ function Strategy() {
         </div>
       </div>
 
-      <div className="pp" style={{ maxWidth: 1400, margin: "0 auto" }}>
+      <div className="pp" style={{ maxWidth: 1800, margin: "0 auto" }}>
 
         {/* TABS */}
         <div className="tab-bar" style={{ marginBottom: 24 }}>
