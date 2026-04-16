@@ -487,7 +487,7 @@ function Strategy() {
 
   const openInEnclave = () => {
     if (!enclaveLink.projectId) return;
-    window.open(`${ENCLAVE_URL}/?page=projects&projectId=${enclaveLink.projectId}`, "_blank");
+    window.open(`${ENCLAVE_URL}/?page=projects&projectId=${enclaveLink.projectId}`, "enclaveApp");
   };
 
   // Pass 2 — Create Enclave project, save link, open Enclave
@@ -537,7 +537,7 @@ function Strategy() {
 
       saveEnclaveLink({ projectId: docRef.id, status: "linked", lastChecked: Date.now() });
       setCollabCreating(false);
-      window.open(`${ENCLAVE_URL}/?page=projects&projectId=${docRef.id}`, "_blank");
+      window.open(`${ENCLAVE_URL}/?page=projects&projectId=${docRef.id}`, "enclaveApp");
 
     } catch (err) {
       console.error("Create collaboration space failed:", err);
