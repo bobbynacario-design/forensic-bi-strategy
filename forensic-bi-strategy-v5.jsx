@@ -934,6 +934,8 @@ function Strategy() {
             }
           }
         } catch (err) { console.error("Load Firestore state error:", err); }
+        // Self-claim any project invites sent to this user's email
+        claimPendingInvites(user);
       } else {
         // User signed out — clear all mode links
         setEnclaveLinks({ solo: EMPTY_LINK, partnership: EMPTY_LINK, client: EMPTY_LINK });
@@ -1016,6 +1018,32 @@ function Strategy() {
     window.open(`${ENCLAVE_URL}/?page=projects&projectId=${enclaveLink.projectId}`, "enclaveApp");
   };
 
+  // Invite-claim: on sign-in, find projects where user's email is in
+  // pendingInvites and self-add as a full member — no email-to-UID lookup needed.
+  const claimPendingInvites = async (user) => {
+    if (!user?.email) return;
+    const email = user.email.toLowerCase();
+    try {
+      const db = firebase.firestore();
+      const q  = await db.collection("projects")
+        .where("pendingInvites", "array-contains", email)
+        .limit(10).get();
+      if (q.empty) return;
+      const batch = db.batch();
+      q.docs.forEach(doc => {
+        batch.update(doc.ref, {
+          memberIds:    firebase.firestore.FieldValue.arrayUnion(user.uid),
+          [`memberNames.${user.uid}`]: user.displayName || user.email,
+          pendingInvites: firebase.firestore.FieldValue.arrayRemove(email),
+          updatedAt:    firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      });
+      await batch.commit();
+    } catch (err) {
+      console.warn('[Praxis] claimPendingInvites failed:', err);
+    }
+  };
+
   // Pass 2 — Create Enclave project, save link, open Enclave
   const createCollaborationSpace = async () => {
     if (!fbUser) { signInWithGoogle(); return; }
@@ -1040,23 +1068,17 @@ function Strategy() {
 
       setSetupModal(false);
 
-      // Resolve member emails → Enclave UIDs
-      let memberIds = [fbUser.uid];
-      let memberNames = { [fbUser.uid]: displayName };
-      let pendingInvites = [];
-      const filteredEmails = setupMembers.filter(e => e.trim() && e.trim() !== fbUser.email);
-      for (const email of filteredEmails) {
-        try {
-          const snap = await db.collection("users").where("email", "==", email.trim()).limit(1).get();
-          if (!snap.empty) {
-            const uDoc = snap.docs[0];
-            memberIds.push(uDoc.id);
-            memberNames[uDoc.id] = uDoc.data().displayName || uDoc.data().name || email.trim();
-          } else {
-            pendingInvites.push(email.trim());
-          }
-        } catch { pendingInvites.push(email.trim()); }
-      }
+      // All collaborator emails become pending invites — no email-to-UID lookup.
+      // Querying users by email allows any authenticated caller to enumerate
+      // whether an address is registered (information-disclosure risk).
+      // Instead, each invitee self-claims their membership on next sign-in
+      // via claimPendingInvites() — zero server-side enumeration surface.
+      const EMAIL_RE      = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const memberIds     = [fbUser.uid];
+      const memberNames   = { [fbUser.uid]: displayName };
+      const pendingInvites = setupMembers
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e && e !== (fbUser.email || "").toLowerCase() && EMAIL_RE.test(e));
 
       // Store roadmap metadata on the user doc (same collection, no new rules needed)
       await db.doc(`users/${fbUser.uid}`).set({
