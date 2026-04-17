@@ -457,8 +457,8 @@ function Strategy() {
     const done = completed[task.id];
     const owner = taskOwners[task.id] || "";
     return (
-      <div key={task.id} className="task-row" onClick={() => toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${color}08` : C.bg, border: `1px solid ${done ? color + "35" : C.borderSub}`, cursor: "pointer", transition: "all 0.15s", marginBottom: 7 }}>
-        <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? color : "#3a3f50"}`, background: done ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
+      <div key={task.id} className="task-row" role="checkbox" aria-checked={!!done} tabIndex={0} onClick={() => toggleTask(task.id)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleTask(task.id); } }} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${color}08` : C.bg, border: `1px solid ${done ? color + "35" : C.borderSub}`, cursor: "pointer", transition: "all 0.15s", marginBottom: 7 }}>
+        <div aria-hidden="true" style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? color : "#3a3f50"}`, background: done ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
           {done && <span style={{ color: "#0D0F14", fontSize: 11, fontWeight: 700 }}>✓</span>}
         </div>
         <span style={{ ...SF, fontSize: 13.5, color: done ? "#6a7080" : C.textMid, textDecoration: done ? "line-through" : "none", lineHeight: 1.5, flex: 1 }}>{task.text}</span>
@@ -507,8 +507,8 @@ function Strategy() {
         {phase.gate.criteria.map(c => {
           const met = gateCompleted[c.id];
           return (
-            <div key={c.id} onClick={() => toggleGate(c.id)} style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "8px 10px", borderRadius: 6, background: met ? `${C[phase.color]}08` : "transparent", border: `1px solid ${met ? C[phase.color] + "30" : C.borderSub}`, cursor: "pointer", marginBottom: 6, transition: "all 0.15s" }}>
-              <div style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, marginTop: 1, border: `1.5px solid ${met ? C[phase.color] : "#3a3f50"}`, background: met ? C[phase.color] : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div key={c.id} role="checkbox" aria-checked={!!met} tabIndex={0} onClick={() => toggleGate(c.id)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleGate(c.id); } }} style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "8px 10px", borderRadius: 6, background: met ? `${C[phase.color]}08` : "transparent", border: `1px solid ${met ? C[phase.color] + "30" : C.borderSub}`, cursor: "pointer", marginBottom: 6, transition: "all 0.15s" }}>
+              <div aria-hidden="true" style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, marginTop: 1, border: `1.5px solid ${met ? C[phase.color] : "#3a3f50"}`, background: met ? C[phase.color] : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {met && <span style={{ color: "#0D0F14", fontSize: 10, fontWeight: 700 }}>✓</span>}
               </div>
               <span style={{ ...SF, fontSize: 12.5, color: met ? C.textDim : C.textMid, textDecoration: met ? "line-through" : "none", lineHeight: 1.4 }}>{c.text}</span>
@@ -663,8 +663,8 @@ function Strategy() {
                 {topMustTasks.length === 0
                   ? <div style={{ color: C.green, fontSize: 13, ...SF }}>✓ All Must tasks in this phase are complete. Check your gate criteria below, then advance.</div>
                   : topMustTasks.map(t => (
-                    <div key={t.id} className="task-row" onClick={() => toggleTask(t.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: C.bg, border: `1px solid ${C.borderSub}`, cursor: "pointer", marginBottom: 7, transition: "all 0.15s" }}>
-                      <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${C.red}`, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }} />
+                    <div key={t.id} className="task-row" role="checkbox" aria-checked={!!completed[t.id]} tabIndex={0} onClick={() => toggleTask(t.id)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleTask(t.id); } }} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: C.bg, border: `1px solid ${C.borderSub}`, cursor: "pointer", marginBottom: 7, transition: "all 0.15s" }}>
+                      <div aria-hidden="true" style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${C.red}`, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }} />
                       <span style={{ ...SF, fontSize: 13.5, color: C.textMid, lineHeight: 1.5, flex: 1 }}>{t.text}</span>
                       <PriorityBadge p={t.priority} />
                       {isTeamMode && taskOwners[t.id] && (
@@ -1245,7 +1245,7 @@ function Strategy() {
                       const key = `${ci}-${ii}`;
                       const open = expandedTraining === key;
                       return (
-                        <div key={ii} onClick={() => setExpandedTraining(open ? null : key)} style={{ ...card, cursor: "pointer", marginBottom: 7 }}>
+                        <div key={ii} role="button" aria-expanded={open} tabIndex={0} onClick={() => setExpandedTraining(open ? null : key)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setExpandedTraining(open ? null : key); } }} style={{ ...card, cursor: "pointer", marginBottom: 7 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                               <span style={{ fontSize: 13.5, color: C.text, ...SF, fontWeight: 500 }}>{item.name}</span>
@@ -1463,8 +1463,8 @@ function Strategy() {
                   {p.tasks.map(task => {
                     const done = completed[task.id];
                     return (
-                      <div key={task.id} onClick={() => track2Unlocked && toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${p.color}08` : C.bg, border: `1px solid ${done ? p.color + "35" : C.borderSub}`, cursor: !track2Unlocked ? "not-allowed" : "pointer", transition: "all 0.15s", marginBottom: 7, opacity: !track2Unlocked ? 0.5 : 1 }}>
-                        <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? p.color : "#3a3f50"}`, background: done ? p.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div key={task.id} role="checkbox" aria-checked={!!done} aria-disabled={!track2Unlocked} tabIndex={track2Unlocked ? 0 : -1} onClick={() => track2Unlocked && toggleTask(task.id)} onKeyDown={e => { if ((e.key === ' ' || e.key === 'Enter') && track2Unlocked) { e.preventDefault(); toggleTask(task.id); } }} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${p.color}08` : C.bg, border: `1px solid ${done ? p.color + "35" : C.borderSub}`, cursor: !track2Unlocked ? "not-allowed" : "pointer", transition: "all 0.15s", marginBottom: 7, opacity: !track2Unlocked ? 0.5 : 1 }}>
+                        <div aria-hidden="true" style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? p.color : "#3a3f50"}`, background: done ? p.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           {done && <span style={{ color: "#0D0F14", fontSize: 11, fontWeight: 700 }}>✓</span>}
                         </div>
                         <span style={{ ...SF, fontSize: 13.5, color: done ? C.textMute : C.textMid, textDecoration: done ? "line-through" : "none", lineHeight: 1.5 }}>{task.text}</span>
@@ -1493,14 +1493,14 @@ function Strategy() {
               {activeMilestones.map(m => {
                 const done = achieved[m.id];
                 return (
-                  <div key={m.id} onClick={() => toggleMilestone(m.id)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", borderRadius: 9, background: done ? `${C.green}12` : C.surface, border: `1px solid ${done ? C.green + "35" : C.border}`, cursor: "pointer", transition: "all 0.2s" }}>
-                    <div style={{ fontSize: 22, flexShrink: 0, opacity: done ? 1 : 0.35 }}>{done ? "🎉" : m.icon}</div>
+                  <div key={m.id} role="checkbox" aria-checked={!!done} tabIndex={0} onClick={() => toggleMilestone(m.id)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleMilestone(m.id); } }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", borderRadius: 9, background: done ? `${C.green}12` : C.surface, border: `1px solid ${done ? C.green + "35" : C.border}`, cursor: "pointer", transition: "all 0.2s" }}>
+                    <div aria-hidden="true" style={{ fontSize: 22, flexShrink: 0, opacity: done ? 1 : 0.35 }}>{done ? "🎉" : m.icon}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, color: done ? C.text : C.textDim, ...SF, fontWeight: done ? 600 : 400 }}>{m.title}</div>
                       <div style={{ fontSize: 12, color: C.textMute, ...SF, marginTop: 2 }}>{m.desc}</div>
                       {done && milestoneDate[m.id] && <div style={{ fontSize: 11, color: C.green, ...SF, marginTop: 4 }}>✓ Achieved: {milestoneDate[m.id]}</div>}
                     </div>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${done ? C.green : "#3a3f50"}`, background: done ? C.green : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                    <div aria-hidden="true" style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${done ? C.green : "#3a3f50"}`, background: done ? C.green : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
                       {done && <span style={{ color: "#0D0F14", fontSize: 11, fontWeight: 700 }}>✓</span>}
                     </div>
                   </div>
