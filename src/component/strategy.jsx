@@ -92,11 +92,22 @@ function Strategy() {
   // ── Storage ───────────────────────────────────────────────────────────────────
   // Writes to localStorage AND syncs to Firestore when authenticated.
   // localStorage = offline cache / instant reads; Firestore = cross-device sync.
+  //
+  // Conflict resolution: every save() stamps a millisecond timestamp for that
+  // key. The auth listener compares local vs cloud timestamps before applying
+  // Firestore state — cloud only wins if its timestamp is strictly newer,
+  // protecting offline work from being overwritten on reconnect.
+  const localTsRef = React.useRef({});  // in-memory mirror of stateTimestamps
+
   const save = async (key, val) => {
     try { await window.storage.set(key, JSON.stringify(val)); } catch (err) { console.warn('[Praxis] storage.set failed for key:', key, err); }
+    // Stamp this key's last-modified time
+    const now = Date.now();
+    localTsRef.current[key] = now;
+    try { await window.storage.set("stateTimestamps", JSON.stringify(localTsRef.current)); } catch (e) { console.warn('[Praxis] stateTimestamps write failed:', e); }
     if (FIREBASE_AVAILABLE && fbUser) {
       firebase.firestore().doc(`users/${fbUser.uid}`)
-        .set({ [`roadmapState.${key}`]: val }, { merge: true })
+        .set({ [`roadmapState.${key}`]: val, [`roadmapState._timestamps.${key}`]: now }, { merge: true })
         .catch(err => console.warn('[Praxis] Firestore sync failed for key:', key, err));
     }
   };
@@ -122,6 +133,8 @@ function Strategy() {
         setTaskOwners(isOld ? { solo: val, partnership: {}, client: {} } : val);
       });
       await tryLoad("lastPhasePerMode", setLastPhasePerMode);
+      // Populate in-memory timestamp ref for conflict resolution
+      await tryLoad("stateTimestamps", ts => { localTsRef.current = ts; });
       // enclaveLink is loaded from Firestore in the auth listener, not localStorage
       try {
         const r = await window.storage.get("financial");
@@ -167,27 +180,48 @@ function Strategy() {
             }
             if (d.roadmapMode) setWorkspaceMode(d.roadmapMode);
 
-            // ── Operational state (cross-device sync) ───────────────────────
-            // Firestore wins over localStorage — last authenticated write is
-            // the source of truth for task completions, pipeline, reviews, etc.
+            // ── Operational state (conflict-safe cross-device sync) ──────────
+            // Cloud wins only when its timestamp is strictly newer than local.
+            // This protects offline edits from being overwritten on reconnect.
             const s = d.roadmapState || {};
-            if (s.completed)      setCompleted(s.completed);
-            if (s.gateCompleted)  setGateCompleted(s.gateCompleted);
-            if (s.currentPhaseId) { setCurrentPhaseId(s.currentPhaseId); setActivePhaseView(s.currentPhaseId); }
-            if (s.achieved)       setAchieved(s.achieved);
-            if (s.milestoneDate)  setMilestoneDate(s.milestoneDate);
-            if (s.savedReviews)   setSavedReviews(s.savedReviews);
-            if (s.prospects) {
+            const cloudTs = s._timestamps || {};
+
+            // Resolve local timestamps — use the in-memory ref when populated
+            // (load() ran first in practice), otherwise read localStorage directly
+            // to guard against the auth-before-load race on slow devices.
+            let localTs = localTsRef.current;
+            if (!Object.keys(localTs).length) {
+              try {
+                const tsr = await window.storage.get("stateTimestamps");
+                if (tsr) { localTs = JSON.parse(tsr.value); localTsRef.current = localTs; }
+              } catch (e) {}
+            }
+            // Returns true when cloud state should overwrite local for this key
+            const cloudWins = (key) => {
+              const local = localTs[key];
+              const cloud = cloudTs[key];
+              return !local || (cloud != null && cloud > local);
+            };
+
+            if (s.completed     && cloudWins('completed'))     setCompleted(s.completed);
+            if (s.gateCompleted && cloudWins('gateCompleted')) setGateCompleted(s.gateCompleted);
+            if (s.currentPhaseId && cloudWins('currentPhaseId')) {
+              setCurrentPhaseId(s.currentPhaseId); setActivePhaseView(s.currentPhaseId);
+            }
+            if (s.achieved      && cloudWins('achieved'))      setAchieved(s.achieved);
+            if (s.milestoneDate && cloudWins('milestoneDate')) setMilestoneDate(s.milestoneDate);
+            if (s.savedReviews  && cloudWins('savedReviews'))  setSavedReviews(s.savedReviews);
+            if (s.prospects     && cloudWins('prospects')) {
               const v = s.prospects;
               setProspects(Array.isArray(v) ? { solo: v, partnership: [], client: [] } : v);
             }
-            if (s.taskOwners) {
+            if (s.taskOwners    && cloudWins('taskOwners')) {
               const v = s.taskOwners;
               const isOld = v && !v.solo && !v.partnership && !v.client;
               setTaskOwners(isOld ? { solo: v, partnership: {}, client: {} } : v);
             }
-            if (s.lastPhasePerMode) setLastPhasePerMode(s.lastPhasePerMode);
-            if (s.financial) {
+            if (s.lastPhasePerMode && cloudWins('lastPhasePerMode')) setLastPhasePerMode(s.lastPhasePerMode);
+            if (s.financial && cloudWins('financial')) {
               const f = s.financial;
               if (f.monthly)               setMonthly(f.monthly);
               if (f.savings        != null) setSavings(f.savings);
@@ -196,12 +230,12 @@ function Strategy() {
               if (f.bizOverhead    != null) setBizOverhead(f.bizOverhead);
               if (f.utilization    != null) setUtilization(f.utilization);
             }
-            if (s.financePartnership) {
+            if (s.financePartnership && cloudWins('financePartnership')) {
               const fp = s.financePartnership;
               if (fp.partnerRows)           setPartnerRows(fp.partnerRows);
               if (fp.sharedOverhead != null) setSharedOverhead(fp.sharedOverhead);
             }
-            if (s.financeClient) {
+            if (s.financeClient && cloudWins('financeClient')) {
               const fc = s.financeClient;
               if (fc.engagementValue != null) setEngagementValue(fc.engagementValue);
               if (fc.invoiced        != null) setInvoiced(fc.invoiced);
@@ -451,14 +485,14 @@ function Strategy() {
   };
   const addProspect = () => {
     if (!newProspect.name.trim()) return;
-    const p = { ...newProspect, id: Date.now() };
+    const p = { ...newProspect, id: Date.now(), lastUpdated: Date.now() };
     const list = [...modeProspects, p];
     const next = { ...prospects, [workspaceMode]: list };
     setProspects(next); save("prospects", next);
     setNewProspect({ name: "", company: "", stage: "prospect", note: "", owner: "" }); setShowAddProspect(false);
   };
   const moveProspect = (id, stage) => {
-    const list = modeProspects.map(p => p.id === id ? { ...p, stage } : p);
+    const list = modeProspects.map(p => p.id === id ? { ...p, stage, lastUpdated: Date.now() } : p);
     const next = { ...prospects, [workspaceMode]: list };
     setProspects(next); save("prospects", next);
   };

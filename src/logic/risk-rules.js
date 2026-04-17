@@ -56,6 +56,34 @@ function computeTopRisk(ctx) {
       },
     },
 
+    // ── 3b. Stale high-value deals — proposal or meeting, no movement in 14d ──
+    {
+      when: ({ prospects }) => {
+        const STALE_MS = 14 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        return prospects.some(p =>
+          (p.stage === "proposal" || p.stage === "meeting") &&
+          p.lastUpdated && (now - p.lastUpdated) > STALE_MS
+        );
+      },
+      build: ({ prospects }) => {
+        const STALE_MS = 14 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const stale = prospects.filter(p =>
+          (p.stage === "proposal" || p.stage === "meeting") &&
+          p.lastUpdated && (now - p.lastUpdated) > STALE_MS
+        );
+        const n = stale.length;
+        const names = stale.slice(0, 2).map(p => p.name).join(", ");
+        const tail = n > 2 ? ` and ${n - 2} more` : "";
+        return {
+          icon: "⏰",
+          label: `${n} stale deal${n > 1 ? "s" : ""}`,
+          note: `${names}${tail} — no movement in 14+ days. Follow up or move to a different stage.`,
+        };
+      },
+    },
+
     // ── 4. Empty pipeline — all modes (client surfaces open proposals first) ──
     {
       when: ({ mode, prospects }) =>
