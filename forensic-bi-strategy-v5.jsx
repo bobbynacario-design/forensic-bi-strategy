@@ -13,14 +13,13 @@ const LIGHT_C = {
   gold: "#C8A96E", blue: "#7EB8C9", green: "#7EC9A2", purple: "#A98FCE",
   orange: "#E8A87C", red: "#E87F6B",
 };
-const C = DARK_C; // module-level alias — used by static data arrays (phases, etc.)
 const SF = { fontFamily: "'DM Sans', system-ui, sans-serif" };
 
 // ─── PRIMARY LANE: Phases A–E ─────────────────────────────────────────────────
 const phases = [
   {
     id: "A", label: "Phase A", title: "Pre-Exit Validation",
-    timeframe: "Now → Month 3", color: C.gold, icon: "🔍",
+    timeframe: "Now → Month 3", color: "gold", icon: "🔍",
     context: "De-risk the transition before you resign. Runway, legal clearance, niche decision, and your flagship offer locked. Do not move to Phase B without clearing this gate.",
     gate: {
       label: "Gate A — Safe to Exit",
@@ -47,7 +46,7 @@ const phases = [
   },
   {
     id: "B", label: "Phase B", title: "Market Entry",
-    timeframe: "Month 2–5", color: C.blue, icon: "🏗️",
+    timeframe: "Month 2–5", color: "blue", icon: "🏗️",
     context: "Build the legal backbone, establish your public presence, and load 20 real prospects into your pipeline. Goal this phase: meetings — not revenue yet.",
     gate: {
       label: "Gate B — Pipeline Is Active",
@@ -76,7 +75,7 @@ const phases = [
   },
   {
     id: "C", label: "Phase C", title: "First Revenue",
-    timeframe: "Month 4–8", color: C.green, icon: "🤝",
+    timeframe: "Month 4–8", color: "green", icon: "🤝",
     context: "One paid Forensic BI Assessment. One testimonial. One case study. That is the complete goal of Phase C. Expert Witness Track 2 opens after this gate — not before.",
     gate: {
       label: "Gate C — First Revenue Proven",
@@ -103,7 +102,7 @@ const phases = [
   },
   {
     id: "D", label: "Phase D", title: "Productization",
-    timeframe: "Month 6–12", color: C.purple, icon: "📦",
+    timeframe: "Month 6–12", color: "purple", icon: "📦",
     context: "Turn your first engagement into a repeatable system. Fixed scope. Fixed price. Delivery templates. Convert one client to a retainer. This is where the business becomes stable.",
     gate: {
       label: "Gate D — Repeatable Business",
@@ -128,7 +127,7 @@ const phases = [
   },
   {
     id: "E", label: "Phase E", title: "Authority Expansion",
-    timeframe: "Month 10–18", color: C.red, icon: "📈",
+    timeframe: "Month 10–18", color: "red", icon: "📈",
     context: "Revenue is proven. A retainer is running. Now build market authority: speaking, premium positioning, Expert Witness expansion — in that order.",
     gate: {
       label: "Gate E — Market Authority",
@@ -155,7 +154,7 @@ const phases = [
 const partnershipPhases = [
   {
     id: "P1", label: "Phase 1", title: "Alignment & Governance",
-    timeframe: "Week 1–4", color: C.blue, icon: "🤝",
+    timeframe: "Week 1–4", color: "blue", icon: "🤝",
     context: "Before you pitch a single client together, the partnership itself must be structured. Roles, economics, decision rights, and conflict rules must be agreed in writing. Skipping this creates expensive problems later.",
     gate: {
       label: "Gate 1 — Partnership Is Structured",
@@ -180,7 +179,7 @@ const partnershipPhases = [
   },
   {
     id: "P2", label: "Phase 2", title: "Offer & Legal Structure",
-    timeframe: "Week 3–8", color: C.gold, icon: "📋",
+    timeframe: "Week 3–8", color: "gold", icon: "📋",
     context: "Build the shared legal and commercial backbone. Your joint offer must be clear before you pitch. Engagement protocols, liability split, and shared credentials must be designed together.",
     gate: {
       label: "Gate 2 — Joint Offer Is Ready",
@@ -205,7 +204,7 @@ const partnershipPhases = [
   },
   {
     id: "P3", label: "Phase 3", title: "Market Activation",
-    timeframe: "Month 2–5", color: C.green, icon: "🚀",
+    timeframe: "Month 2–5", color: "green", icon: "🚀",
     context: "Go to market as a team. Your combined network is larger than either alone. Lead with your strongest combined credential and target clients that need both capabilities.",
     gate: {
       label: "Gate 3 — Pipeline Is Active",
@@ -229,7 +228,7 @@ const partnershipPhases = [
   },
   {
     id: "P4", label: "Phase 4", title: "First Joint Delivery",
-    timeframe: "Month 4–8", color: C.purple, icon: "⚙️",
+    timeframe: "Month 4–8", color: "purple", icon: "⚙️",
     context: "One paid engagement delivered together. Clean handoffs, clear accountability, and a shared post-engagement review. This phase tests whether the partnership actually works under client pressure.",
     gate: {
       label: "Gate 4 — First Joint Engagement Complete",
@@ -253,7 +252,7 @@ const partnershipPhases = [
   },
   {
     id: "P5", label: "Phase 5", title: "Repeatability & Growth",
-    timeframe: "Month 7–14", color: C.red, icon: "📈",
+    timeframe: "Month 7–14", color: "red", icon: "📈",
     context: "Turn the first engagement into a repeatable system. Standardize delivery. Build recurring revenue. Decide whether to deepen the partnership or define each partner's independent lane.",
     gate: {
       label: "Gate 5 — Repeatable Partnership",
@@ -281,7 +280,7 @@ const partnershipPhases = [
 const clientPhases = [
   {
     id: "C1", label: "Phase 1", title: "Qualification & Opportunity",
-    timeframe: "Week 1–2", color: C.blue, icon: "🎯",
+    timeframe: "Week 1–2", color: "blue", icon: "🎯",
     context: "Before committing delivery resources, qualify the opportunity. Is the scope clear? Is the client ready? Is the budget confirmed? A bad engagement that starts fast is worse than a good engagement that starts right.",
     gate: {
       label: "Gate 1 — Opportunity Qualified",
@@ -304,7 +303,7 @@ const clientPhases = [
   },
   {
     id: "C2", label: "Phase 2", title: "Scope & Proposal",
-    timeframe: "Week 2–4", color: C.gold, icon: "📄",
+    timeframe: "Week 2–4", color: "gold", icon: "📄",
     context: "A clear scope protects both sides. Define exactly what you will deliver, what you will not, and what you need from the client. Scope creep starts here if you are not precise.",
     gate: {
       label: "Gate 2 — Engagement Signed",
@@ -327,7 +326,7 @@ const clientPhases = [
   },
   {
     id: "C3", label: "Phase 3", title: "Kickoff & Data Access",
-    timeframe: "Week 4–6", color: C.green, icon: "🚀",
+    timeframe: "Week 4–6", color: "green", icon: "🚀",
     context: "Get the engagement started cleanly. Introductions, data access, and the first working session set the tone for everything that follows. Delays here compound through the whole timeline.",
     gate: {
       label: "Gate 3 — Data Access Confirmed",
@@ -350,7 +349,7 @@ const clientPhases = [
   },
   {
     id: "C4", label: "Phase 4", title: "Analysis & Findings",
-    timeframe: "Week 5–10", color: C.purple, icon: "🔍",
+    timeframe: "Week 5–10", color: "purple", icon: "🔍",
     context: "This is the core of the engagement. Follow your methodology. Document every finding as you go. Flag anomalies early — do not save surprises for the final report.",
     gate: {
       label: "Gate 4 — Findings Complete",
@@ -374,7 +373,7 @@ const clientPhases = [
   },
   {
     id: "C5", label: "Phase 5", title: "Reporting & Handover",
-    timeframe: "Week 9–12", color: C.orange, icon: "📊",
+    timeframe: "Week 9–12", color: "orange", icon: "📊",
     context: "Deliver clearly, present confidently, and make it easy for the client to act on your findings. The quality of your report is the main thing clients will remember and share with referrers.",
     gate: {
       label: "Gate 5 — Engagement Delivered",
@@ -397,7 +396,7 @@ const clientPhases = [
   },
   {
     id: "C6", label: "Phase 6", title: "Closeout & Expansion",
-    timeframe: "Week 12+", color: C.red, icon: "🔄",
+    timeframe: "Week 12+", color: "red", icon: "🔄",
     context: "A closed engagement is not the end — it is the start of the next one. Collect payment, debrief internally, and look for the expansion opportunity before the relationship goes cold.",
     gate: {
       label: "Gate 6 — Engagement Closed",
@@ -458,11 +457,11 @@ const expertWitnessPhases = [
 
 // ─── PIPELINE ─────────────────────────────────────────────────────────────────
 const pipelineStageDefs = [
-  { id: "prospect", label: "Prospects", color: C.blue, icon: "🎯", desc: "Identified, not yet contacted" },
-  { id: "outreach", label: "Outreach", color: C.gold, icon: "📤", desc: "First message sent" },
-  { id: "meeting", label: "Meeting", color: C.purple, icon: "🤝", desc: "Meeting booked or held" },
-  { id: "proposal", label: "Proposal", color: C.orange, icon: "📄", desc: "Proposal submitted" },
-  { id: "won", label: "Won", color: C.green, icon: "✅", desc: "Engagement signed" },
+  { id: "prospect", label: "Prospects", color: "blue", icon: "🎯", desc: "Identified, not yet contacted" },
+  { id: "outreach", label: "Outreach", color: "gold", icon: "📤", desc: "First message sent" },
+  { id: "meeting", label: "Meeting", color: "purple", icon: "🤝", desc: "Meeting booked or held" },
+  { id: "proposal", label: "Proposal", color: "orange", icon: "📄", desc: "Proposal submitted" },
+  { id: "won", label: "Won", color: "green", icon: "✅", desc: "Engagement signed" },
   { id: "retainer", label: "Retainer", color: "#A8C87E", icon: "🔄", desc: "Recurring active" },
 ];
 
@@ -496,23 +495,23 @@ const clientQuestions = [
 
 // ─── TRAINING ─────────────────────────────────────────────────────────────────
 const trainingResources = [
-  { category: "Priority Credentials", color: C.gold, icon: "🏆", items: [
+  { category: "Priority Credentials", color: "gold", icon: "🏆", items: [
     { name: "CFE — Certified Fraud Examiner", org: "ACFE", type: "Exam + Membership", urgency: "HIGH", note: "Gold standard for forensic work globally. Completes your CPA + CIA + CFE triangle. Earns 32% income premium per ACFE data.", url: "https://www.acfe.com/cfe-credential" },
     { name: "CrFA® — Certified Forensic Accountant", org: "CrFA Philippines / ICFA", type: "Certification Program", urgency: "HIGH", note: "PH-based, court-recognized credential. Faster to obtain than CFE. Covers litigation support, fraud investigation, evidence handling.", url: "https://crfaphilippines.org" },
     { name: "CFF — Certified in Financial Forensics", org: "AICPA", type: "Specialty Credential", urgency: "MEDIUM", note: "For CPAs specifically. Signals courtroom-ready forensic expertise. Internationally recognized — useful if you retain AU clients.", url: "https://www.aicpa-cima.com/certifications/certified-in-financial-forensics-cff" },
   ]},
-  { category: "Expert Witness & Litigation Support", color: C.orange, icon: "⚖️", items: [
+  { category: "Expert Witness & Litigation Support", color: "orange", icon: "⚖️", items: [
     { name: "PH Rules on Evidence — 2019 Revised Rules", org: "Supreme Court of the Philippines", type: "Free Self-Study", urgency: "HIGH", note: "Read Rule 130 Secs 49–52 (expert witnesses) and Rule 132 (examination). Non-negotiable before your first engagement.", url: "https://sc.judiciary.gov.ph/11542/" },
     { name: "The CFE as an Expert Witness", org: "ACFE Online", type: "Online Course", urgency: "HIGH", note: "Covers legal standards for expert witnesses, how to give expert testimony, voir dire preparation, and how to compose proper expert reports.", url: "https://www.acfe.com/training-events-and-products/all-products/product-detail-page?s=The-CFE-as-an-Expert-Witness" },
     { name: "ACFE All Online Training Options", org: "ACFE", type: "Online Course Hub", urgency: "MEDIUM", note: "Browse the full library of ACFE self-study, webinars, and certificate programs.", url: "https://www.acfe.com/training-events-and-products/online-training-options" },
   ]},
-  { category: "Forensic BI & Data Skills", color: C.blue, icon: "📊", items: [
+  { category: "Forensic BI & Data Skills", color: "blue", icon: "📊", items: [
     { name: "Fraud Analytics Certificate Program", org: "ACFE Online", type: "Online Certificate", urgency: "HIGH", note: "Three-course program covering data analytics for fraud detection. Covers anomaly detection, Benford's Law, and transaction tracing.", url: "https://www.acfe.com/training-events-and-products/all-products/product-detail-page?s=fraud-analytics-certificate-program" },
     { name: "Financial Analysis in Power BI", org: "DataCamp", type: "Self-Paced Online", urgency: "HIGH", note: "Teaches financial terms, BI dashboards, AI visualizations, scenario analysis — directly applicable to forensic client reporting.", url: "https://www.datacamp.com/courses/financial-analysis-in-power-bi" },
     { name: "Microsoft Power BI Data Analyst", org: "Coursera / Microsoft", type: "Self-Paced Online", urgency: "MEDIUM", note: "Official Microsoft-offered Power BI program. Prepares you for PL-300 certification. Covers data modeling, DAX, and dashboard design.", url: "https://www.coursera.org/professional-certificates/microsoft-power-bi-data-analyst" },
     { name: "Fraud Detection in Python", org: "DataCamp", type: "Self-Paced Online", urgency: "MEDIUM", note: "Covers supervised and unsupervised ML for fraud detection — the technical backbone of advanced forensic BI work.", url: "https://www.datacamp.com/courses/fraud-detection-in-python" },
   ]},
-  { category: "PH Professional Networks", color: C.green, icon: "🤝", items: [
+  { category: "PH Professional Networks", color: "green", icon: "🤝", items: [
     { name: "ACFE Philippines Chapter", org: "ACFE", type: "Professional Membership", urgency: "HIGH", note: "Attend local events. This is where forensic practitioners, lawyers, and regulators intersect in PH.", url: "https://www.acfe.com/about/chapters/philippines" },
     { name: "IIA Philippines", org: "IIA PH", type: "Professional Membership", urgency: "HIGH", note: "Your CIA credential makes you a natural here. Speak at events — fastest credibility builder in the internal audit space.", url: "https://www.iia.org.ph" },
     { name: "PICPA", org: "PICPA", type: "Professional Membership", urgency: "MEDIUM", note: "CFO and Audit Committee networks. Chapters in major cities hold regular events and CPE sessions.", url: "https://www.picpa.com.ph" },
@@ -521,16 +520,16 @@ const trainingResources = [
 
 // ─── MINDSET ──────────────────────────────────────────────────────────────────
 const mindsetPillars = [
-  { icon: "🧠", title: "Adversarial Resilience", subtitle: "Train for cross-examination before you face it", color: C.orange, practices: ["Practice 'stress inoculation': regularly expose yourself to being challenged on your work. Ask colleagues to poke holes in your analysis.", "Record yourself explaining your findings out loud — then critique your own clarity, pace, and composure.", "Read transcripts of CPA expert cross-examinations (available in published SC decisions) — study how experts buckle and how they hold.", "Join a Toastmasters chapter or debate club — adversarial Q&A is a trainable skill, not a personality trait.", "Book: 'Effective Expert Witnessing' by Jack Matson — covers psychological preparation for hostile questioning."] },
-  { icon: "🪨", title: "Stoic Composure", subtitle: "The stand requires equanimity, not emotion", color: C.purple, practices: ["Daily Stoic practice: distinguish what you control (your methodology, preparation, honesty) from what you don't (the judge's ruling, opposing counsel's tactics).", "Book: 'Meditations' by Marcus Aurelius — reframe adversarial pressure as the arena where character is proven.", "Pre-testimony ritual: 5 minutes of focused breathing + mental rehearsal of your opening qualifications statement.", "Reframe cross-examination: opposing counsel is testing your methodology, not attacking you personally.", "After each high-pressure moment: debrief with yourself. What rattled you and why?"] },
-  { icon: "🔍", title: "Intellectual Precision", subtitle: "Expert witnesses are judged on exactness, not confidence", color: C.blue, practices: ["Write one-paragraph technical summaries for a non-expert audience daily — forces precise language.", "Practice saying 'I don't know' and 'that is outside my expertise' without anxiety — courts respect honesty.", "Study your AU forensic BI findings critically — where were you relying on assumption vs. data?", "Book: 'Thinking, Fast and Slow' by Kahneman — sharpens awareness of cognitive biases that can contaminate expert opinion.", "Maintain a 'limitations log' in each engagement: what can the data prove, and what can't it prove?"] },
-  { icon: "🪞", title: "Identity Shift", subtitle: "From 'employed analyst' to 'independent credentialed expert'", color: C.green, practices: ["Rewrite your professional self-narrative: you are activating a rare credential set, not leaving a job.", "Book: 'The War of Art' by Steven Pressfield — on turning professional and overcoming resistance.", "Weekly journaling prompt: 'What would a recognized forensic expert in PH do this week that I am not yet doing?'", "Find one mentor or peer who has already gone independent — mirror their posture, not just their tactics.", "Celebrate credentials loudly on LinkedIn — CPA + CIA is not bragging, it's professional context clients need."] },
-  { icon: "🏋️", title: "High-Stakes Communication", subtitle: "Your voice is a professional instrument — train it", color: C.red, practices: ["Study the difference between expert report writing and consulting report writing — courts require specific structure.", "Practice delivering your expert opinion in exactly 60 seconds — clarity under time pressure is a courtroom skill.", "Video-record yourself giving testimony in a mock scenario — watch it back critically.", "Book: 'Talk Like TED' by Carmine Gallo — high-stakes communication for courtrooms and boardrooms.", "Eliminate: 'basically,' 'I think,' 'sort of,' 'maybe' — replace with precise quantified statements."] },
+  { icon: "🧠", title: "Adversarial Resilience", subtitle: "Train for cross-examination before you face it", color: "orange", practices: ["Practice 'stress inoculation': regularly expose yourself to being challenged on your work. Ask colleagues to poke holes in your analysis.", "Record yourself explaining your findings out loud — then critique your own clarity, pace, and composure.", "Read transcripts of CPA expert cross-examinations (available in published SC decisions) — study how experts buckle and how they hold.", "Join a Toastmasters chapter or debate club — adversarial Q&A is a trainable skill, not a personality trait.", "Book: 'Effective Expert Witnessing' by Jack Matson — covers psychological preparation for hostile questioning."] },
+  { icon: "🪨", title: "Stoic Composure", subtitle: "The stand requires equanimity, not emotion", color: "purple", practices: ["Daily Stoic practice: distinguish what you control (your methodology, preparation, honesty) from what you don't (the judge's ruling, opposing counsel's tactics).", "Book: 'Meditations' by Marcus Aurelius — reframe adversarial pressure as the arena where character is proven.", "Pre-testimony ritual: 5 minutes of focused breathing + mental rehearsal of your opening qualifications statement.", "Reframe cross-examination: opposing counsel is testing your methodology, not attacking you personally.", "After each high-pressure moment: debrief with yourself. What rattled you and why?"] },
+  { icon: "🔍", title: "Intellectual Precision", subtitle: "Expert witnesses are judged on exactness, not confidence", color: "blue", practices: ["Write one-paragraph technical summaries for a non-expert audience daily — forces precise language.", "Practice saying 'I don't know' and 'that is outside my expertise' without anxiety — courts respect honesty.", "Study your AU forensic BI findings critically — where were you relying on assumption vs. data?", "Book: 'Thinking, Fast and Slow' by Kahneman — sharpens awareness of cognitive biases that can contaminate expert opinion.", "Maintain a 'limitations log' in each engagement: what can the data prove, and what can't it prove?"] },
+  { icon: "🪞", title: "Identity Shift", subtitle: "From 'employed analyst' to 'independent credentialed expert'", color: "green", practices: ["Rewrite your professional self-narrative: you are activating a rare credential set, not leaving a job.", "Book: 'The War of Art' by Steven Pressfield — on turning professional and overcoming resistance.", "Weekly journaling prompt: 'What would a recognized forensic expert in PH do this week that I am not yet doing?'", "Find one mentor or peer who has already gone independent — mirror their posture, not just their tactics.", "Celebrate credentials loudly on LinkedIn — CPA + CIA is not bragging, it's professional context clients need."] },
+  { icon: "🏋️", title: "High-Stakes Communication", subtitle: "Your voice is a professional instrument — train it", color: "red", practices: ["Study the difference between expert report writing and consulting report writing — courts require specific structure.", "Practice delivering your expert opinion in exactly 60 seconds — clarity under time pressure is a courtroom skill.", "Video-record yourself giving testimony in a mock scenario — watch it back critically.", "Book: 'Talk Like TED' by Carmine Gallo — high-stakes communication for courtrooms and boardrooms.", "Eliminate: 'basically,' 'I think,' 'sort of,' 'maybe' — replace with precise quantified statements."] },
 ];
 
 // ─── AI WORKFLOWS ─────────────────────────────────────────────────────────────
 const aiWorkflows = [
-  { id: "aw1", icon: "🔍", color: C.gold, title: "Forensic Data Analysis", subtitle: "AI as your co-analyst on live engagements", edge: "Replaces weeks of manual query writing. You focus on interpretation and judgment — AI handles the computation.",
+  { id: "aw1", icon: "🔍", color: "gold", title: "Forensic Data Analysis", subtitle: "AI as your co-analyst on live engagements", edge: "Replaces weeks of manual query writing. You focus on interpretation and judgment — AI handles the computation.",
     usecases: [
       { label: "Benford's Law Test", when: "Early in any engagement to flag suspicious transaction distributions", prompt: `You are a forensic data analyst. I'm uploading a dataset of [journal entries / transactions / payments].\nRun a Benford's Law analysis:\n1. Calculate the first-digit frequency distribution\n2. Compare against expected Benford frequencies\n3. Identify which digits show statistically significant deviations (use chi-square test)\n4. Flag the specific transactions behind the anomalous digits for further review\n5. Present findings in a table suitable for a forensic report` },
       { label: "Anomaly Detection", when: "To surface unusual transactions that don't fit normal patterns", prompt: `Act as a forensic accountant reviewing this dataset for internal control weaknesses.\nIdentify:\n1. Transactions that fall outside 2-3 standard deviations from the mean\n2. Round-number transactions (ending in 000, 500) that may indicate estimation or fabrication\n3. Transactions posted outside business hours or on weekends/holidays\n4. Duplicate or near-duplicate entries (same amount, same vendor, close dates)\n5. Transactions just below approval thresholds (e.g., just under ₱50,000 or ₱100,000)\nFlag each with a risk rating (High/Medium/Low) and explain the forensic significance.` },
@@ -538,7 +537,7 @@ const aiWorkflows = [
       { label: "Journal Entry Testing", when: "For internal audit or financial statement fraud investigations", prompt: `Perform a forensic journal entry analysis on this GL data:\n1. Identify entries posted by unusual users (IT staff, terminated employees, system accounts)\n2. Flag entries with no supporting description or vague narratives (e.g., "adj", "misc", "correction")\n3. Identify entries posted on last day of month, quarter, or year-end (earnings management risk)\n4. Surface debits to expense accounts offset by credits to revenue (potential concealment)\n5. Flag entries that reverse in the subsequent period without clear justification\nFormat findings as a risk-ranked table with the entry details and forensic interpretation.` },
     ]
   },
-  { id: "aw2", icon: "📄", color: C.blue, title: "Forensic Report Writing", subtitle: "AI as your co-author — you supply the findings, AI structures the language", edge: "Cuts report drafting time by 60–70%. You review, refine, and sign — AI does the heavy lifting on structure.",
+  { id: "aw2", icon: "📄", color: "blue", title: "Forensic Report Writing", subtitle: "AI as your co-author — you supply the findings, AI structures the language", edge: "Cuts report drafting time by 60–70%. You review, refine, and sign — AI does the heavy lifting on structure.",
     usecases: [
       { label: "Executive Summary", when: "Final deliverable for Audit Committee or CFO", prompt: `You are a senior forensic accountant writing for a board audience. Based on these findings:\n[paste your bullet findings here]\n\nWrite a 1-page Executive Summary that:\n1. Opens with a clear statement of scope and objective\n2. Summarizes key findings in plain language — what was found and why it matters\n3. Quantifies the financial impact or risk exposure where possible\n4. States 3–5 prioritized recommendations\n5. Closes with a statement on limitations of the analysis\nTone: professional, direct, no hedging. The board needs to act — make the findings impossible to ignore.` },
       { label: "Expert Witness Report", when: "Formal written opinion for court submission", prompt: `Draft a forensic expert opinion report section based on the following findings:\n[paste your technical findings here]\n\nStructure it as:\n1. Statement of Qualifications (placeholder — I will insert my CPA-CIA credentials)\n2. Scope of Engagement — what I was asked to examine and by whom\n3. Methodology — data sources reviewed, analytical techniques applied\n4. Findings — presented as numbered, factual statements with supporting data references\n5. Opinion — my professional conclusion stated clearly and defensibly\n6. Limitations — what this analysis cannot conclude and why\n7. Declaration of Independence\n\nUse precise, court-appropriate language. Avoid advocacy. Every opinion must be grounded in the data.` },
@@ -546,21 +545,21 @@ const aiWorkflows = [
       { label: "Internal Audit Finding", when: "Retainer clients — monthly or quarterly audit analytics reports", prompt: `Write a formal internal audit finding based on the following observation:\n[describe what you found]\n\nUse the CRSA format:\n- Condition: What is the current situation / what was observed?\n- Risk: What is the risk or potential impact of this condition?\n- Standard: What policy, control, or best practice is not being met?\n- Action Plan: Recommended corrective action with responsible owner and target date\n\nTone: constructive, not punitive. The goal is improvement, not blame. Write for a CFO audience.` },
     ]
   },
-  { id: "aw3", icon: "⚖️", color: C.orange, title: "Expert Witness Prep", subtitle: "AI as your moot court partner — stress-test your opinion before you take the stand", edge: "The closest thing to a free rehearsal with a hostile lawyer. Use this before every testimony.",
+  { id: "aw3", icon: "⚖️", color: "orange", title: "Expert Witness Prep", subtitle: "AI as your moot court partner — stress-test your opinion before you take the stand", edge: "The closest thing to a free rehearsal with a hostile lawyer. Use this before every testimony.",
     usecases: [
       { label: "Cross-Examination Stress Test", when: "Before any expert witness testimony — mandatory preparation step", prompt: `You are an aggressive opposing counsel in a Philippine court. I am a CPA-CIA forensic expert witness who has submitted the following opinion:\n[paste your expert opinion / key findings]\n\nYour job is to challenge my opinion as hard as possible by:\n1. Questioning my methodology — are there alternative explanations for my findings?\n2. Attacking my data sources — are they complete, reliable, and properly authenticated?\n3. Challenging my qualifications for this specific type of analysis\n4. Pointing out any assumptions I made that are not fully supported by the data\n5. Proposing alternative interpretations of the same evidence\n\nBe relentless. Do not go easy. I need to know every weak point before I face real opposing counsel.` },
       { label: "Voir Dire Preparation", when: "Before your first (and every) expert witness qualification", prompt: `Simulate a voir dire examination where you are the judge qualifying me as an expert witness in a Philippine court.\n\nMy credentials: CPA (PRC licensed), CIA (IIA certified), [X] years forensic BI experience including AU market.\nThe case involves: [describe the financial dispute briefly]\n\nAsk me the questions a judge would ask to determine if I am qualified to give expert opinion on this matter. After I answer each one, give me feedback on:\n- Whether my answer would satisfy a Philippine court\n- What I should add or remove\n- Whether I sound confident and credible or uncertain` },
       { label: "Opinion Clarity Check", when: "Before finalizing any written expert report", prompt: `Review my expert opinion below and tell me:\n[paste opinion section]\n\n1. Is every conclusion clearly grounded in the data I cited? Flag any opinion that appears unsupported.\n2. Are there any statements that sound like legal conclusions rather than financial/forensic opinions?\n3. Is the language precise enough to survive cross-examination, or are there vague terms opposing counsel could exploit?\n4. Would a non-accountant judge understand the key findings from this alone?\n5. What is the single weakest sentence in this opinion and how should I rewrite it?` },
     ]
   },
-  { id: "aw4", icon: "💼", color: C.purple, title: "Business Development", subtitle: "AI as your pitch writer, proposal drafter, and LinkedIn ghostwriter", edge: "You have the expertise — AI helps you communicate it at the level your clients expect.",
+  { id: "aw4", icon: "💼", color: "purple", title: "Business Development", subtitle: "AI as your pitch writer, proposal drafter, and LinkedIn ghostwriter", edge: "You have the expertise — AI helps you communicate it at the level your clients expect.",
     usecases: [
       { label: "Engagement Proposal", when: "Every time a prospective client asks 'what does this cost and what will you do?'", prompt: `Write a professional forensic BI engagement proposal for the following client and situation:\nClient type: [law firm / listed company / bank / insurer]\nSituation: [describe what they need]\nMy proposed scope: [what I plan to do]\nTimeline: [estimated weeks]\nFee: [amount in PHP]\n\nStructure the proposal as:\n1. Background & Objective\n2. Scope of Work (what is and is not included)\n3. Methodology (high level — enough to show rigor without giving away the approach)\n4. Deliverables\n5. Timeline & Milestones\n6. Investment (fee, payment terms, retainer if applicable)\n7. Why Me (3 sentences on CPA-CIA credentials + AU forensic BI experience)\n\nTone: confident, specific, premium. This should feel written for them.` },
       { label: "LinkedIn Post", when: "Weekly or bi-weekly — building your public profile in the PH forensic space", prompt: `Write a LinkedIn post for a CPA-CIA forensic BI consultant in the Philippines on the following topic:\n[topic — e.g., 'how Benford's Law catches financial fraud' / 'why most PH audit reports miss the data story']\n\nRequirements:\n- Opens with a hook that stops the scroll (a surprising fact, a question, or a bold statement)\n- Written in first person, professional but not stiff\n- Explains one concrete concept clearly — no jargon without explanation\n- Ends with a call to reflection or a question that invites comments\n- 200–280 words. No bullet points — write in short paragraphs.\n- Subtly positions me as the expert without being promotional` },
       { label: "Cold Outreach Message", when: "First contact with a litigation lawyer or CFO via LinkedIn or email", prompt: `Write a cold outreach message to a [litigation lawyer / CFO / Audit Committee chair] in the Philippines.\nContext: I am a CPA-CIA forensic BI consultant recently independent. I am introducing myself as available for [expert witness work / forensic BI assessments / internal audit analytics].\nI found them through: [LinkedIn / PICPA event / IBP seminar / referral from X]\n\nRequirements:\n- 4–5 sentences maximum. Respect their time.\n- Lead with relevance — why am I reaching out to them specifically\n- One sentence on my credentials (CPA, CIA, AU forensic experience)\n- One clear, low-friction call to action (15-minute call, not a full pitch)\n- Peer-to-peer professional tone — not desperate or generic` },
     ]
   },
-  { id: "aw5", icon: "🧠", color: C.green, title: "Continuous Learning", subtitle: "Replace generic courses with targeted, case-specific AI-guided learning", edge: "Learn exactly what you need, when you need it, applied to your actual work.",
+  { id: "aw5", icon: "🧠", color: "green", title: "Continuous Learning", subtitle: "Replace generic courses with targeted, case-specific AI-guided learning", edge: "Learn exactly what you need, when you need it, applied to your actual work.",
     usecases: [
       { label: "Deep Dive Any Topic", when: "When you encounter something in an engagement you haven't dealt with before", prompt: `Teach me everything a CPA-CIA forensic BI consultant needs to know about [topic — e.g., transfer pricing manipulation / related party fraud / revenue recognition schemes].\n\nStructure it as:\n1. What it is and how it works (plain language)\n2. How it typically appears in financial data — what are the data signatures?\n3. The most effective analytical tests to detect it\n4. How to document findings for a forensic report or court opinion\n5. Common defenses the opposing party will raise and how to counter them\n6. 2–3 real-world case examples that illustrate the scheme` },
       { label: "CFE / CrFA Exam Prep", when: "While studying for your next credential", prompt: `I am studying for the [CFE / CrFA] exam. Quiz me on [topic — e.g., fraud schemes in financial statements / asset misappropriation / corruption schemes].\n\nFor each question:\n1. Ask me the question first and wait for my answer\n2. Tell me if I'm right or wrong and why\n3. If I'm wrong, explain the correct answer with an example\n4. Connect it to a real-world scenario a forensic accountant in PH would face\n5. After 5 questions, give me a score and tell me which concepts I need to review` },
@@ -571,17 +570,17 @@ const aiWorkflows = [
 
 // ─── PRICING ──────────────────────────────────────────────────────────────────
 const pricingServices = [
-  { title: "Forensic BI Assessment", icon: "🔍", color: C.gold, desc: "Fixed-scope, fixed-price engagement. Your flagship product. Deliverable: forensic BI report with findings, visualizations, and recommendations.", tiers: [
+  { title: "Forensic BI Assessment", icon: "🔍", color: "gold", desc: "Fixed-scope, fixed-price engagement. Your flagship product. Deliverable: forensic BI report with findings, visualizations, and recommendations.", tiers: [
     { tier: "Starter", scope: "Single business unit, 1–2 data sources, 2–3 week delivery", php: "₱120,000 – ₱180,000", usd: "USD 2,000 – 3,000", note: "Entry-level for SMEs or first-time clients" },
     { tier: "Standard", scope: "Multi-unit, 3–5 data sources, 4–6 week delivery", php: "₱250,000 – ₱400,000", usd: "USD 4,500 – 7,000", note: "Listed companies, banks, mid-size corporates" },
     { tier: "Enterprise", scope: "Complex, multi-source, extended timeline, board presentation", php: "₱500,000+", usd: "USD 9,000+", note: "AU clients, large listed companies, regulatory matters" },
   ]},
-  { title: "Expert Witness / Litigation Support", icon: "⚖️", color: C.orange, desc: "Charged as a combination of preparation time, report writing, and testimony. Your CPA credential justifies 2–3x your advisory day rate.", tiers: [
+  { title: "Expert Witness / Litigation Support", icon: "⚖️", color: "orange", desc: "Charged as a combination of preparation time, report writing, and testimony. Your CPA credential justifies 2–3x your advisory day rate.", tiers: [
     { tier: "Litigation Consultant", scope: "Behind the scenes — analytics support, no testimony", php: "₱8,000 – ₱15,000/day", usd: "USD 150 – 250/day", note: "Starting engagement type. Build the relationship." },
     { tier: "Expert Report Only", scope: "Written forensic opinion for submission, no testimony", php: "₱80,000 – ₱150,000 flat", usd: "USD 1,500 – 2,500 flat", note: "Fixed scope. Cover all your research and drafting time." },
     { tier: "Full Expert Witness", scope: "Report + voir dire + direct + cross-examination", php: "₱25,000 – ₱45,000/day", usd: "USD 450 – 800/day", note: "Premium rate. CPA credential + testimony risk justifies this." },
   ]},
-  { title: "Internal Audit Analytics Retainer", icon: "🔄", color: C.green, desc: "Monthly recurring engagement. Continuous anomaly monitoring, dashboard maintenance, quarterly reporting. Your most stable revenue stream.", tiers: [
+  { title: "Internal Audit Analytics Retainer", icon: "🔄", color: "green", desc: "Monthly recurring engagement. Continuous anomaly monitoring, dashboard maintenance, quarterly reporting. Your most stable revenue stream.", tiers: [
     { tier: "Monitoring Lite", scope: "Monthly anomaly scan, 1–2 dashboards, summary report", php: "₱30,000 – ₱50,000/mo", usd: "USD 550 – 900/mo", note: "SMEs and growing companies. Low-touch, high-margin." },
     { tier: "Full Retainer", scope: "Weekly monitoring, full dashboard suite, monthly board report", php: "₱75,000 – ₱120,000/mo", usd: "USD 1,300 – 2,100/mo", note: "Listed companies, banks. Anchor client model." },
     { tier: "AU Remote Retainer", scope: "Full service delivered remotely for AU-based clients", php: "N/A", usd: "USD 2,500 – 4,500/mo", note: "Price in AU market terms. Your cost base = your margin advantage." },
@@ -624,7 +623,7 @@ const milestonesList = [
   { id: "m12", icon: "🌏", title: "First AU Remote Client (Independent)", desc: "International reach, PH base. The full vision realized." },
 ];
 
-const urgencyColors = { HIGH: C.red, MEDIUM: C.gold };
+const urgencyColors = { HIGH: "red", MEDIUM: "gold" };
 
 // ─── ENCLAVE INTEGRATION ──────────────────────────────────────────────────────
 const ENCLAVE_URL = "https://bobbynacario-design.github.io/enclave";
@@ -702,8 +701,8 @@ function Strategy() {
 
   // ── Theme ─────────────────────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch { return 'dark'; } });
-  // Shadow module-level C with the active theme palette — used by all component rendering
-  const C = theme === 'dark' ? DARK_C : LIGHT_C; // eslint-disable-line no-shadow
+  // Active theme palette — used by all component rendering
+  const C = theme === 'dark' ? DARK_C : LIGHT_C;
   const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: "24px 28px" };
   const inputSt = { background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, color: C.text, padding: "10px 14px", fontSize: 15, ...SF, width: "100%", boxSizing: "border-box", outline: "none" };
   const toggleTheme = () => { const n = theme === 'dark' ? 'light' : 'dark'; setTheme(n); try { localStorage.setItem('fba_theme', n); } catch {} };
@@ -1080,10 +1079,10 @@ function Strategy() {
         const done = p.tasks.filter(t => completed[t.id]).length;
         const isActive = active === p.id;
         return (
-          <button key={p.id} onClick={() => setActive(p.id)} style={{ padding: "6px 13px", borderRadius: 6, border: isActive ? `1.5px solid ${p.color}` : `1.5px solid ${C.border}`, background: isActive ? `${p.color}15` : "transparent", color: isActive ? p.color : C.textMute, cursor: "pointer", fontSize: 12, ...SF, transition: "all 0.15s", display: "flex", alignItems: "center", gap: 5 }}>
+          <button key={p.id} onClick={() => setActive(p.id)} style={{ padding: "6px 13px", borderRadius: 6, border: isActive ? `1.5px solid ${C[p.color]}` : `1.5px solid ${C.border}`, background: isActive ? `${C[p.color]}15` : "transparent", color: isActive ? C[p.color] : C.textMute, cursor: "pointer", fontSize: 12, ...SF, transition: "all 0.15s", display: "flex", alignItems: "center", gap: 5 }}>
             <span>{p.icon}</span>
             <span style={{ fontWeight: isActive ? 600 : 400 }}>{p.label}</span>
-            {done > 0 && <span style={{ background: p.color, color: "#0D0F14", borderRadius: 10, padding: "0 5px", fontSize: 9, fontWeight: 700 }}>{done}/{p.tasks.length}</span>}
+            {done > 0 && <span style={{ background: C[p.color], color: "#0D0F14", borderRadius: 10, padding: "0 5px", fontSize: 9, fontWeight: 700 }}>{done}/{p.tasks.length}</span>}
           </button>
         );
       })}
@@ -1095,18 +1094,18 @@ function Strategy() {
     const total = gateTotal(phase.id);
     const clear = done === total;
     return (
-      <div style={{ background: clear ? `${phase.color}10` : C.bg, border: `1px solid ${clear ? phase.color + "50" : C.border}`, borderRadius: 10, padding: "18px 22px", marginTop: 16 }}>
+      <div style={{ background: clear ? `${C[phase.color]}10` : C.bg, border: `1px solid ${clear ? C[phase.color] + "50" : C.border}`, borderRadius: 10, padding: "18px 22px", marginTop: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <div style={{ fontSize: 11, color: clear ? phase.color : C.textMute, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+          <div style={{ fontSize: 11, color: clear ? C[phase.color] : C.textMute, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em" }}>
             {clear ? "✓ " : ""}{phase.gate.label}
           </div>
-          <span style={{ fontSize: 12, color: clear ? phase.color : C.textDim, ...SF }}>{done}/{total} criteria met</span>
+          <span style={{ fontSize: 12, color: clear ? C[phase.color] : C.textDim, ...SF }}>{done}/{total} criteria met</span>
         </div>
         {phase.gate.criteria.map(c => {
           const met = gateCompleted[c.id];
           return (
-            <div key={c.id} onClick={() => toggleGate(c.id)} style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "8px 10px", borderRadius: 6, background: met ? `${phase.color}08` : "transparent", border: `1px solid ${met ? phase.color + "30" : C.borderSub}`, cursor: "pointer", marginBottom: 6, transition: "all 0.15s" }}>
-              <div style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, marginTop: 1, border: `1.5px solid ${met ? phase.color : "#3a3f50"}`, background: met ? phase.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div key={c.id} onClick={() => toggleGate(c.id)} style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "8px 10px", borderRadius: 6, background: met ? `${C[phase.color]}08` : "transparent", border: `1px solid ${met ? C[phase.color] + "30" : C.borderSub}`, cursor: "pointer", marginBottom: 6, transition: "all 0.15s" }}>
+              <div style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, marginTop: 1, border: `1.5px solid ${met ? C[phase.color] : "#3a3f50"}`, background: met ? C[phase.color] : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {met && <span style={{ color: "#0D0F14", fontSize: 10, fontWeight: 700 }}>✓</span>}
               </div>
               <span style={{ ...SF, fontSize: 12.5, color: met ? C.textDim : C.textMid, textDecoration: met ? "line-through" : "none", lineHeight: 1.4 }}>{c.text}</span>
@@ -1207,7 +1206,7 @@ function Strategy() {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 12, color: C.textDim, ...SF }}>Current phase:</span>
                 {activePhases.map(p => (
-                  <button key={p.id} onClick={() => { setCurrentPhaseId(p.id); save("currentPhaseId", p.id); }} style={{ padding: "5px 12px", borderRadius: 6, border: currentPhaseId === p.id ? `1.5px solid ${p.color}` : `1.5px solid ${C.border}`, background: currentPhaseId === p.id ? `${p.color}18` : "transparent", color: currentPhaseId === p.id ? p.color : C.textMute, cursor: "pointer", fontSize: 11, ...SF, fontWeight: currentPhaseId === p.id ? 700 : 400, transition: "all 0.15s" }}>
+                  <button key={p.id} onClick={() => { setCurrentPhaseId(p.id); save("currentPhaseId", p.id); }} style={{ padding: "5px 12px", borderRadius: 6, border: currentPhaseId === p.id ? `1.5px solid ${C[p.color]}` : `1.5px solid ${C.border}`, background: currentPhaseId === p.id ? `${C[p.color]}18` : "transparent", color: currentPhaseId === p.id ? C[p.color] : C.textMute, cursor: "pointer", fontSize: 11, ...SF, fontWeight: currentPhaseId === p.id ? 700 : 400, transition: "all 0.15s" }}>
                     {p.icon} {p.label}
                   </button>
                 ))}
@@ -1215,14 +1214,14 @@ function Strategy() {
 
               {/* Top Row: Phase card + Gate progress */}
               <div className="g2" style={{ marginBottom: 16 }}>
-                <div style={{ background: `linear-gradient(135deg,${currentPhase.color}15,${C.surface})`, border: `1px solid ${currentPhase.color}40`, borderLeft: `3px solid ${currentPhase.color}`, borderRadius: 10, padding: "18px 22px" }}>
-                  <div style={{ fontSize: 10, color: currentPhase.color, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4, ...SF }}>{currentPhase.label} · {currentPhase.timeframe}</div>
+                <div style={{ background: `linear-gradient(135deg,${C[currentPhase.color]}15,${C.surface})`, border: `1px solid ${C[currentPhase.color]}40`, borderLeft: `3px solid ${C[currentPhase.color]}`, borderRadius: 10, padding: "18px 22px" }}>
+                  <div style={{ fontSize: 10, color: C[currentPhase.color], letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4, ...SF }}>{currentPhase.label} · {currentPhase.timeframe}</div>
                   <div style={{ fontSize: 17, color: C.text, marginBottom: 8 }}>{currentPhase.icon} {currentPhase.title}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     <div style={{ flex: 1, height: 5, background: "#1e2330", borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${phaseTasksTotal > 0 ? Math.round(phaseTasksDone / phaseTasksTotal * 100) : 0}%`, background: currentPhase.color, borderRadius: 3, transition: "width 0.3s" }} />
+                      <div style={{ height: "100%", width: `${phaseTasksTotal > 0 ? Math.round(phaseTasksDone / phaseTasksTotal * 100) : 0}%`, background: C[currentPhase.color], borderRadius: 3, transition: "width 0.3s" }} />
                     </div>
-                    <span style={{ fontSize: 11, color: currentPhase.color, ...SF }}>{phaseTasksDone}/{phaseTasksTotal}</span>
+                    <span style={{ fontSize: 11, color: C[currentPhase.color], ...SF }}>{phaseTasksDone}/{phaseTasksTotal}</span>
                   </div>
                   <div style={{ fontSize: 11, color: C.textDim, ...SF }}>Gate: {gateDone}/{gateMax} criteria met{gateClear(currentPhaseId) ? " ✓" : ""}</div>
                 </div>
@@ -1420,7 +1419,7 @@ function Strategy() {
                     return n > 0 ? (
                       <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                         <span style={{ fontSize: 12, color: C.textDim, ...SF }}>{s.icon} {s.label}</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: s.color, ...SF }}>{n}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: C[s.color] || s.color, ...SF }}>{n}</span>
                       </div>
                     ) : null;
                   })}
@@ -1464,11 +1463,11 @@ function Strategy() {
               const p = viewPhase;
               return (
                 <div>
-                  <div style={{ background: C.surface, border: `1px solid ${p.color}30`, borderLeft: `3px solid ${p.color}`, borderRadius: 10, padding: "22px 26px", marginBottom: 8 }}>
-                    <div style={{ fontSize: 10, color: p.color, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4, ...SF }}>{p.label} · {p.timeframe}</div>
+                  <div style={{ background: C.surface, border: `1px solid ${C[p.color]}30`, borderLeft: `3px solid ${C[p.color]}`, borderRadius: 10, padding: "22px 26px", marginBottom: 8 }}>
+                    <div style={{ fontSize: 10, color: C[p.color], letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4, ...SF }}>{p.label} · {p.timeframe}</div>
                     <h2 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 400, color: C.text }}>{p.icon} {p.title}</h2>
                     <p style={{ color: C.textDim, fontSize: 13, ...SF, marginBottom: 18, marginTop: 4, fontStyle: "italic" }}>{p.context}</p>
-                    <TaskList tasks={p.tasks} color={p.color} />
+                    <TaskList tasks={p.tasks} color={C[p.color]} />
                   </div>
                   <GateCard phase={p} />
                 </div>
@@ -1528,9 +1527,9 @@ function Strategy() {
               {pipelineStageDefs.map(s => {
                 const n = prospects.filter(p => p.stage === s.id).length;
                 return (
-                  <div key={s.id} style={{ background: n > 0 ? `${s.color}12` : C.surface, border: `1px solid ${n > 0 ? s.color + "40" : C.border}`, borderRadius: 8, padding: "10px 16px", textAlign: "center", minWidth: 90 }}>
+                  <div key={s.id} style={{ background: n > 0 ? `${C[s.color] || s.color}12` : C.surface, border: `1px solid ${n > 0 ? (C[s.color] || s.color) + "40" : C.border}`, borderRadius: 8, padding: "10px 16px", textAlign: "center", minWidth: 90 }}>
                     <div style={{ fontSize: 16 }}>{s.icon}</div>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: n > 0 ? s.color : C.textMute, ...SF }}>{n}</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: n > 0 ? (C[s.color] || s.color) : C.textMute, ...SF }}>{n}</div>
                     <div style={{ fontSize: 10, color: C.textMute, ...SF }}>{s.label}</div>
                   </div>
                 );
@@ -1547,11 +1546,11 @@ function Strategy() {
                   <div key={stage.id} style={{ marginBottom: 20 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                       <span style={{ fontSize: 14 }}>{stage.icon}</span>
-                      <span style={{ fontSize: 12, color: stage.color, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{stage.label}</span>
+                      <span style={{ fontSize: 12, color: C[stage.color] || stage.color, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{stage.label}</span>
                       <span style={{ fontSize: 11, color: C.textMute, ...SF }}>({stageProspects.length})</span>
                     </div>
                     {stageProspects.map(p => (
-                      <div key={p.id} className="prospect-card" style={{ background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${stage.color}`, borderRadius: 8, padding: "12px 16px", marginBottom: 8, transition: "border-color 0.15s" }}>
+                      <div key={p.id} className="prospect-card" style={{ background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C[stage.color] || stage.color}`, borderRadius: 8, padding: "12px 16px", marginBottom: 8, transition: "border-color 0.15s" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                           <div style={{ flex: 1 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1562,7 +1561,7 @@ function Strategy() {
                             {p.note && <div style={{ fontSize: 12, color: C.textMute, ...SF, marginTop: 4, fontStyle: "italic" }}>{p.note}</div>}
                           </div>
                           <div style={{ display: "flex", gap: 6, alignItems: "center", marginLeft: 10 }}>
-                            <select value={p.stage} onChange={e => moveProspect(p.id, e.target.value)} style={{ background: C.bg, border: `1px solid ${C.border}`, color: stage.color, borderRadius: 5, padding: "4px 8px", fontSize: 11, ...SF, cursor: "pointer" }}>
+                            <select value={p.stage} onChange={e => moveProspect(p.id, e.target.value)} style={{ background: C.bg, border: `1px solid ${C.border}`, color: C[stage.color] || stage.color, borderRadius: 5, padding: "4px 8px", fontSize: 11, ...SF, cursor: "pointer" }}>
                               {pipelineStageDefs.map(s => <option key={s.id} value={s.id}>{s.icon} {s.label}</option>)}
                             </select>
                             <button onClick={() => deleteProspect(p.id)} style={{ background: "transparent", border: "none", color: C.textMute, cursor: "pointer", fontSize: 14, padding: "2px 4px" }}>✕</button>
@@ -1837,7 +1836,7 @@ function Strategy() {
                   <div key={ci} style={{ marginBottom: 22 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                       <span style={{ fontSize: 15 }}>{cat.icon}</span>
-                      <span style={{ fontSize: 11, color: cat.color, ...SF, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{cat.category}</span>
+                      <span style={{ fontSize: 11, color: C[cat.color], ...SF, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{cat.category}</span>
                     </div>
                     {cat.items.map((item, ii) => {
                       const key = `${ci}-${ii}`;
@@ -1847,7 +1846,7 @@ function Strategy() {
                           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                               <span style={{ fontSize: 13.5, color: C.text, ...SF, fontWeight: 500 }}>{item.name}</span>
-                              <span style={{ background: `${urgencyColors[item.urgency]}18`, border: `1px solid ${urgencyColors[item.urgency]}40`, color: urgencyColors[item.urgency], borderRadius: 10, padding: "1px 7px", fontSize: 9, ...SF, fontWeight: 700 }}>{item.urgency}</span>
+                              <span style={{ background: `${C[urgencyColors[item.urgency]]}18`, border: `1px solid ${C[urgencyColors[item.urgency]]}40`, color: C[urgencyColors[item.urgency]], borderRadius: 10, padding: "1px 7px", fontSize: 9, ...SF, fontWeight: 700 }}>{item.urgency}</span>
                               <span style={{ fontSize: 10, color: C.textMute, ...SF, background: C.borderSub, borderRadius: 10, padding: "1px 7px" }}>{item.type}</span>
                             </div>
                             <span style={{ color: C.textMute, fontSize: 11 }}>{open ? "▲" : "▼"}</span>
@@ -1856,7 +1855,7 @@ function Strategy() {
                           {open && (
                             <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 10, marginTop: 10 }}>
                               <p style={{ color: C.textMid, fontSize: 13, ...SF, margin: "0 0 10px", lineHeight: 1.6 }}>{item.note}</p>
-                              {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: `${cat.color}15`, border: `1px solid ${cat.color}40`, color: cat.color, borderRadius: 6, padding: "6px 14px", fontSize: 12, ...SF, textDecoration: "none", fontWeight: 600 }}>🔗 Open →</a>}
+                              {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: `${C[cat.color]}15`, border: `1px solid ${C[cat.color]}40`, color: C[cat.color], borderRadius: 6, padding: "6px 14px", fontSize: 12, ...SF, textDecoration: "none", fontWeight: 600 }}>🔗 Open →</a>}
                             </div>
                           )}
                         </div>
@@ -1873,7 +1872,7 @@ function Strategy() {
                 <p style={{ color: C.textDim, fontSize: 13, ...SF, marginBottom: 16, fontStyle: "italic" }}>Rewiring your mindset is as important as your credentials. Expert witnesses are tested psychologically before they are tested legally.</p>
                 <div style={{ display: "flex", gap: 7, marginBottom: 18, flexWrap: "wrap" }}>
                   {mindsetPillars.map((p, i) => (
-                    <button key={i} onClick={() => setActiveMindset(i)} style={{ padding: "6px 13px", borderRadius: 6, border: activeMindset === i ? `1.5px solid ${p.color}` : `1.5px solid ${C.border}`, background: activeMindset === i ? `${p.color}15` : "transparent", color: activeMindset === i ? p.color : C.textMute, cursor: "pointer", fontSize: 12, ...SF, display: "flex", alignItems: "center", gap: 5, fontWeight: activeMindset === i ? 600 : 400 }}>
+                    <button key={i} onClick={() => setActiveMindset(i)} style={{ padding: "6px 13px", borderRadius: 6, border: activeMindset === i ? `1.5px solid ${C[p.color]}` : `1.5px solid ${C.border}`, background: activeMindset === i ? `${C[p.color]}15` : "transparent", color: activeMindset === i ? C[p.color] : C.textMute, cursor: "pointer", fontSize: 12, ...SF, display: "flex", alignItems: "center", gap: 5, fontWeight: activeMindset === i ? 600 : 400 }}>
                       <span>{p.icon}</span><span>{p.title}</span>
                     </button>
                   ))}
@@ -1881,14 +1880,14 @@ function Strategy() {
                 {(() => {
                   const p = mindsetPillars[activeMindset];
                   return (
-                    <div style={{ background: C.surface, border: `1px solid ${p.color}30`, borderLeft: `3px solid ${p.color}`, borderRadius: 10, padding: "22px 26px" }}>
+                    <div style={{ background: C.surface, border: `1px solid ${C[p.color]}30`, borderLeft: `3px solid ${C[p.color]}`, borderRadius: 10, padding: "22px 26px" }}>
                       <div style={{ fontSize: 20, marginBottom: 8 }}>{p.icon}</div>
                       <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 400, color: C.text }}>{p.title}</h2>
                       <p style={{ color: C.textDim, fontSize: 13, ...SF, marginBottom: 18, marginTop: 0, fontStyle: "italic" }}>{p.subtitle}</p>
                       {p.practices.map((prac, i) => (
                         <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 12 }}>
-                          <div style={{ width: 22, height: 22, borderRadius: "50%", background: `${p.color}18`, border: `1px solid ${p.color}35`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                            <span style={{ fontSize: 10, color: p.color, ...SF, fontWeight: 700 }}>{i + 1}</span>
+                          <div style={{ width: 22, height: 22, borderRadius: "50%", background: `${C[p.color]}18`, border: `1px solid ${C[p.color]}35`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                            <span style={{ fontSize: 10, color: C[p.color], ...SF, fontWeight: 700 }}>{i + 1}</span>
                           </div>
                           <p style={{ color: C.textMid, fontSize: 13.5, ...SF, margin: 0, lineHeight: 1.6 }}>{prac}</p>
                         </div>
@@ -1909,7 +1908,7 @@ function Strategy() {
                 <div style={{ display: "flex", gap: 7, marginBottom: 20, flexWrap: "wrap" }}>
                   {aiWorkflows.map(wf => {
                     const isActive = activeAIWorkflow === wf.id;
-                    return <button key={wf.id} onClick={() => { setActiveAIWorkflow(wf.id); setActiveUseCase(0); }} style={{ padding: "7px 13px", borderRadius: 6, border: isActive ? `1.5px solid ${wf.color}` : `1.5px solid ${C.border}`, background: isActive ? `${wf.color}15` : "transparent", color: isActive ? wf.color : C.textMute, cursor: "pointer", fontSize: 12, ...SF, display: "flex", alignItems: "center", gap: 5, fontWeight: isActive ? 600 : 400 }}><span>{wf.icon}</span><span>{wf.title}</span></button>;
+                    return <button key={wf.id} onClick={() => { setActiveAIWorkflow(wf.id); setActiveUseCase(0); }} style={{ padding: "7px 13px", borderRadius: 6, border: isActive ? `1.5px solid ${C[wf.color]}` : `1.5px solid ${C.border}`, background: isActive ? `${C[wf.color]}15` : "transparent", color: isActive ? C[wf.color] : C.textMute, cursor: "pointer", fontSize: 12, ...SF, display: "flex", alignItems: "center", gap: 5, fontWeight: isActive ? 600 : 400 }}><span>{wf.icon}</span><span>{wf.title}</span></button>;
                   })}
                 </div>
                 {(() => {
@@ -1918,24 +1917,24 @@ function Strategy() {
                   const uc = wf.usecases[activeUseCase];
                   return (
                     <div>
-                      <div style={{ background: C.surface, border: `1px solid ${wf.color}30`, borderLeft: `3px solid ${wf.color}`, borderRadius: 10, padding: "18px 22px", marginBottom: 14 }}>
+                      <div style={{ background: C.surface, border: `1px solid ${C[wf.color]}30`, borderLeft: `3px solid ${C[wf.color]}`, borderRadius: 10, padding: "18px 22px", marginBottom: 14 }}>
                         <div style={{ fontSize: 20, marginBottom: 6 }}>{wf.icon}</div>
                         <h2 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 400, color: C.text }}>{wf.title}</h2>
                         <p style={{ color: C.textDim, fontSize: 13, ...SF, margin: "0 0 8px", fontStyle: "italic" }}>{wf.subtitle}</p>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${wf.color}12`, border: `1px solid ${wf.color}30`, borderRadius: 6, padding: "4px 10px" }}>
-                          <span style={{ fontSize: 11, color: wf.color, ...SF }}>⚡ {wf.edge}</span>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${C[wf.color]}12`, border: `1px solid ${C[wf.color]}30`, borderRadius: 6, padding: "4px 10px" }}>
+                          <span style={{ fontSize: 11, color: C[wf.color], ...SF }}>⚡ {wf.edge}</span>
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
-                        {wf.usecases.map((u, i) => <button key={i} onClick={() => setActiveUseCase(i)} style={{ padding: "6px 12px", borderRadius: 6, border: activeUseCase === i ? `1.5px solid ${wf.color}` : `1.5px solid ${C.border}`, background: activeUseCase === i ? `${wf.color}12` : "transparent", color: activeUseCase === i ? wf.color : C.textMute, cursor: "pointer", fontSize: 12, ...SF }}>{u.label}</button>)}
+                        {wf.usecases.map((u, i) => <button key={i} onClick={() => setActiveUseCase(i)} style={{ padding: "6px 12px", borderRadius: 6, border: activeUseCase === i ? `1.5px solid ${C[wf.color]}` : `1.5px solid ${C.border}`, background: activeUseCase === i ? `${C[wf.color]}12` : "transparent", color: activeUseCase === i ? C[wf.color] : C.textMute, cursor: "pointer", fontSize: 12, ...SF }}>{u.label}</button>)}
                       </div>
-                      <div style={{ background: "#0a0c10", border: `1px solid ${wf.color}25`, borderRadius: 10, overflow: "hidden" }}>
+                      <div style={{ background: "#0a0c10", border: `1px solid ${C[wf.color]}25`, borderRadius: 10, overflow: "hidden" }}>
                         <div style={{ padding: "12px 16px", borderBottom: `1px solid ${C.borderSub}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
                             <div style={{ fontSize: 13, color: C.text, fontWeight: 600, ...SF }}>{uc.label}</div>
                             <div style={{ fontSize: 11, color: C.textMute, ...SF, marginTop: 2 }}>📌 Use when: {uc.when}</div>
                           </div>
-                          <button onClick={() => { navigator.clipboard.writeText(uc.prompt); setCopiedPrompt(uc.label); setTimeout(() => setCopiedPrompt(null), 2000); }} style={{ background: copiedPrompt === uc.label ? C.green : `${wf.color}18`, border: `1px solid ${copiedPrompt === uc.label ? C.green : wf.color + "50"}`, color: copiedPrompt === uc.label ? "#0D0F14" : wf.color, borderRadius: 6, padding: "6px 13px", cursor: "pointer", fontSize: 12, ...SF, fontWeight: 600, transition: "all 0.3s", whiteSpace: "nowrap" }}>
+                          <button onClick={() => { navigator.clipboard.writeText(uc.prompt); setCopiedPrompt(uc.label); setTimeout(() => setCopiedPrompt(null), 2000); }} style={{ background: copiedPrompt === uc.label ? C.green : `${C[wf.color]}18`, border: `1px solid ${copiedPrompt === uc.label ? C.green : C[wf.color] + "50"}`, color: copiedPrompt === uc.label ? "#0D0F14" : C[wf.color], borderRadius: 6, padding: "6px 13px", cursor: "pointer", fontSize: 12, ...SF, fontWeight: 600, transition: "all 0.3s", whiteSpace: "nowrap" }}>
                             {copiedPrompt === uc.label ? "✓ Copied!" : "📋 Copy"}
                           </button>
                         </div>
@@ -1957,15 +1956,15 @@ function Strategy() {
                   <div key={si} style={{ marginBottom: 26 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                       <span style={{ fontSize: 18 }}>{svc.icon}</span>
-                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 400, color: svc.color }}>{svc.title}</h3>
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 400, color: C[svc.color] }}>{svc.title}</h3>
                     </div>
                     <p style={{ color: C.textDim, fontSize: 13, ...SF, marginBottom: 12, lineHeight: 1.6 }}>{svc.desc}</p>
                     {svc.tiers.map((tier, ti) => (
-                      <div key={ti} style={{ background: C.surface, border: `1px solid ${svc.color}22`, borderLeft: `3px solid ${svc.color}`, borderRadius: 8, padding: "12px 16px", marginBottom: 7 }}>
+                      <div key={ti} style={{ background: C.surface, border: `1px solid ${C[svc.color]}22`, borderLeft: `3px solid ${C[svc.color]}`, borderRadius: 8, padding: "12px 16px", marginBottom: 7 }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
                           <span style={{ fontSize: 13, color: C.text, fontWeight: 600, ...SF }}>{tier.tier}</span>
                           <div style={{ display: "flex", gap: 8 }}>
-                            <span style={{ fontSize: 13, color: svc.color, ...SF, fontWeight: 700 }}>{tier.php}</span>
+                            <span style={{ fontSize: 13, color: C[svc.color], ...SF, fontWeight: 700 }}>{tier.php}</span>
                             {tier.usd !== "N/A" && <span style={{ fontSize: 11, color: C.textMute, ...SF }}>{tier.usd}</span>}
                           </div>
                         </div>

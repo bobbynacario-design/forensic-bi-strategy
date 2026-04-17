@@ -1,8 +1,8 @@
-const CACHE = 'praxis-v1';
+const CACHE = 'praxis-v2';
 const SHELL = [
   '/forensic-bi-strategy/',
   '/forensic-bi-strategy/index.html',
-  '/forensic-bi-strategy/forensic-bi-strategy-v5.jsx?v=5',
+  '/forensic-bi-strategy/forensic-bi-strategy-v5.jsx?v=6',
   '/forensic-bi-strategy/icon.svg',
   '/forensic-bi-strategy/manifest.json',
 ];
