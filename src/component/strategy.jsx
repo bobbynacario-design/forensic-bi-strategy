@@ -80,7 +80,16 @@ function Strategy() {
   const headerBg = theme === 'dark' ? 'linear-gradient(135deg,#0D0F14 0%,#1a1f2e 100%)' : 'linear-gradient(135deg,#F0ECE7 0%,#EAE5DE 100%)';
 
   // ── Storage ───────────────────────────────────────────────────────────────────
-  const save = async (key, val) => { try { await window.storage.set(key, JSON.stringify(val)); } catch (err) { console.warn('[Praxis] storage.set failed for key:', key, err); } };
+  // Writes to localStorage AND syncs to Firestore when authenticated.
+  // localStorage = offline cache / instant reads; Firestore = cross-device sync.
+  const save = async (key, val) => {
+    try { await window.storage.set(key, JSON.stringify(val)); } catch (err) { console.warn('[Praxis] storage.set failed for key:', key, err); }
+    if (fbUser) {
+      firebase.firestore().doc(`users/${fbUser.uid}`)
+        .set({ [`roadmapState.${key}`]: val }, { merge: true })
+        .catch(err => console.warn('[Praxis] Firestore sync failed for key:', key, err));
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -122,22 +131,57 @@ function Strategy() {
         try {
           const snap = await firebase.firestore().doc(`users/${user.uid}`).get();
           if (snap.exists) {
-            if (snap.data().fbaLinks) {
-              // Current shape — per-mode object
-              const raw = snap.data().fbaLinks;
+            const d = snap.data();
+
+            // ── Enclave links ───────────────────────────────────────────────
+            if (d.fbaLinks) {
+              const raw = d.fbaLinks;
               setEnclaveLinks({
                 solo:        normalizeEnclaveLink(raw.solo        || EMPTY_LINK),
                 partnership: normalizeEnclaveLink(raw.partnership || EMPTY_LINK),
                 client:      normalizeEnclaveLink(raw.client      || EMPTY_LINK),
               });
-            } else if (snap.data().fbaLink) {
+            } else if (d.fbaLink) {
               // Legacy single-link — migrate into the user's stored mode slot
-              const legacyMode = snap.data().roadmapMode || "solo";
-              setEnclaveLinks(prev => ({ ...prev, [legacyMode]: normalizeEnclaveLink(snap.data().fbaLink) }));
+              const legacyMode = d.roadmapMode || "solo";
+              setEnclaveLinks(prev => ({ ...prev, [legacyMode]: normalizeEnclaveLink(d.fbaLink) }));
             }
-            if (snap.data().roadmapMode) setWorkspaceMode(snap.data().roadmapMode);
+            if (d.roadmapMode) setWorkspaceMode(d.roadmapMode);
+
+            // ── Operational state (cross-device sync) ───────────────────────
+            // Firestore wins over localStorage — last authenticated write is
+            // the source of truth for task completions, pipeline, reviews, etc.
+            const s = d.roadmapState || {};
+            if (s.completed)      setCompleted(s.completed);
+            if (s.gateCompleted)  setGateCompleted(s.gateCompleted);
+            if (s.currentPhaseId) { setCurrentPhaseId(s.currentPhaseId); setActivePhaseView(s.currentPhaseId); }
+            if (s.achieved)       setAchieved(s.achieved);
+            if (s.milestoneDate)  setMilestoneDate(s.milestoneDate);
+            if (s.savedReviews)   setSavedReviews(s.savedReviews);
+            if (s.prospects)      setProspects(s.prospects);
+            if (s.taskOwners)     setTaskOwners(s.taskOwners);
+            if (s.financial) {
+              const f = s.financial;
+              if (f.monthly)               setMonthly(f.monthly);
+              if (f.savings        != null) setSavings(f.savings);
+              if (f.projectedMonthly != null) setProjectedMonthly(f.projectedMonthly);
+              if (f.taxRate        != null) setTaxRate(f.taxRate);
+              if (f.bizOverhead    != null) setBizOverhead(f.bizOverhead);
+              if (f.utilization    != null) setUtilization(f.utilization);
+            }
+            if (s.financePartnership) {
+              const fp = s.financePartnership;
+              if (fp.partnerRows)           setPartnerRows(fp.partnerRows);
+              if (fp.sharedOverhead != null) setSharedOverhead(fp.sharedOverhead);
+            }
+            if (s.financeClient) {
+              const fc = s.financeClient;
+              if (fc.engagementValue != null) setEngagementValue(fc.engagementValue);
+              if (fc.invoiced        != null) setInvoiced(fc.invoiced);
+              if (fc.collectedAmt    != null) setCollectedAmt(fc.collectedAmt);
+            }
           }
-        } catch (err) { console.error("Load fbaLinks from Firestore error:", err); }
+        } catch (err) { console.error("Load Firestore state error:", err); }
       } else {
         // User signed out — clear all mode links
         setEnclaveLinks({ solo: EMPTY_LINK, partnership: EMPTY_LINK, client: EMPTY_LINK });
