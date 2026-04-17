@@ -1,5 +1,4 @@
 const { useState, useEffect } = React;
-
 // ─── PALETTE ──────────────────────────────────────────────────────────────────
 const DARK_C = {
   bg: "#0D0F14", surface: "#13161f", border: "#2a2f3e", borderSub: "#1e2330",
@@ -14,7 +13,6 @@ const LIGHT_C = {
   orange: "#E8A87C", red: "#E87F6B",
 };
 const SF = { fontFamily: "'DM Sans', system-ui, sans-serif" };
-
 // ─── PRIMARY LANE: Phases A–E ─────────────────────────────────────────────────
 const phases = [
   {
@@ -149,7 +147,6 @@ const phases = [
     ]
   },
 ];
-
 // ─── PARTNERSHIP PHASES ───────────────────────────────────────────────────────
 const partnershipPhases = [
   {
@@ -275,7 +272,6 @@ const partnershipPhases = [
     ]
   },
 ];
-
 // ─── CLIENT PHASES ────────────────────────────────────────────────────────────
 const clientPhases = [
   {
@@ -418,7 +414,6 @@ const clientPhases = [
     ]
   },
 ];
-
 // ─── MILESTONES — PARTNERSHIP ──────────────────────────────────────────────────
 const partnershipMilestones = [
   { id: "pm1", icon: "🤝", title: "Partnership Agreement Signed", desc: "Roles, economics, and exit terms are in writing. The foundation is set." },
@@ -432,7 +427,6 @@ const partnershipMilestones = [
   { id: "pm9", icon: "🌏", title: "First International Client", desc: "The combined credentials opened a cross-border opportunity." },
   { id: "pm10", icon: "📈", title: "Rates Reviewed and Raised", desc: "Track record justifies premium positioning. Pricing updated." },
 ];
-
 // ─── MILESTONES — CLIENT ───────────────────────────────────────────────────────
 const clientMilestones = [
   { id: "cm1", icon: "🎯", title: "First Opportunity Qualified", desc: "A real prospect with confirmed scope, budget, and access." },
@@ -446,7 +440,6 @@ const clientMilestones = [
   { id: "cm9", icon: "🤝", title: "First Referral from a Client", desc: "A satisfied client sent new business your way." },
   { id: "cm10", icon: "📈", title: "Three Engagements Completed", desc: "The delivery model is proven and repeatable." },
 ];
-
 // ─── EXPERT WITNESS — TRACK 2 ─────────────────────────────────────────────────
 const expertWitnessPhases = [
   { id: "ew1", label: "EW Phase 1", title: "Know the Legal Terrain", timeframe: "Now → Month 4", color: "#E8A87C", icon: "📜", context: "Before you can testify, you must understand the procedural rules cold. Lawyers will immediately sense if you don't.", tasks: [{ id: "ew1a", text: "Study the 2019 Revised Rules on Evidence — focus on Rule 130 Sections 49–52 (Expert Witness)" }, { id: "ew1b", text: "Study Rule 132 on presentation of evidence and examination of witnesses" }, { id: "ew1c", text: "Read at least 5 PH Supreme Court decisions involving CPA expert witness testimony" }, { id: "ew1d", text: "Understand the voir dire process — how a judge qualifies an expert witness in court" }, { id: "ew1e", text: "Learn what 'basis of opinion' means legally — courts can reject an expert who can't defend their methodology" }] },
@@ -454,7 +447,6 @@ const expertWitnessPhases = [
   { id: "ew3", label: "EW Phase 3", title: "Open the Litigation Door", timeframe: "Month 4–9", color: "#87C4C0", icon: "⚖️", context: "Litigation lawyers are your gatekeepers to the witness stand. Build relationships before you pitch the service.", tasks: [{ id: "ew3a", text: "Attend IBP chapter events as a guest — accounting/fraud CPE crossovers are common" }, { id: "ew3b", text: "Offer to co-present with a litigation lawyer on 'Forensic BI in Financial Litigation'" }, { id: "ew3c", text: "Cold-introduce yourself to 5–10 litigation lawyers via LinkedIn as a forensic CPA" }, { id: "ew3d", text: "Offer first 1–2 engagements as litigation consultant (behind the scenes) — analytics support, no testimony yet" }, { id: "ew3e", text: "Accept your first testimonial engagement at a reduced fee for full process exposure" }, { id: "ew3f", text: "After first testimony: debrief with the lawyer — what worked, what was challenged" }] },
   { id: "ew4", label: "EW Phase 4", title: "Command the Stand", timeframe: "Month 9–18", color: "#A8C87E", icon: "🏛️", context: "Repeat engagements, growing reputation, and premium pricing. Each testimony builds the next.", tasks: [{ id: "ew4a", text: "Build a structured Expert Witness Report template (opinion, methodology, findings, limitations)" }, { id: "ew4b", text: "Develop standard BI visualization formats optimized for court presentation" }, { id: "ew4c", text: "Collect written feedback or referral letters from lawyers after each engagement" }, { id: "ew4d", text: "Publish article on 'What to look for in a forensic CPA expert witness'" }, { id: "ew4e", text: "Set your expert witness rate independently — testimony commands 2–3x regular advisory rates" }, { id: "ew4f", text: "Track: cases supported, testimony given, successful outcomes — this is your expert witness record" }] },
 ];
-
 // ─── PIPELINE ─────────────────────────────────────────────────────────────────
 const pipelineStageDefs = [
   { id: "prospect", label: "Prospects", color: "blue", icon: "🎯", desc: "Identified, not yet contacted" },
@@ -464,7 +456,6 @@ const pipelineStageDefs = [
   { id: "won", label: "Won", color: "green", icon: "✅", desc: "Engagement signed" },
   { id: "retainer", label: "Retainer", color: "#A8C87E", icon: "🔄", desc: "Recurring active" },
 ];
-
 // ─── WEEKLY QUESTIONS ─────────────────────────────────────────────────────────
 const decisionQuestions = [
   "What is the ONE offer I am actively pushing this week — and to whom specifically?",
@@ -492,7 +483,6 @@ const clientQuestions = [
   "What has changed in scope since last week — and has it been documented?",
   "What work is ready to invoice now, and what is holding the billing back?",
 ];
-
 // ─── TRAINING ─────────────────────────────────────────────────────────────────
 const trainingResources = [
   { category: "Priority Credentials", color: "gold", icon: "🏆", items: [
@@ -517,7 +507,6 @@ const trainingResources = [
     { name: "PICPA", org: "PICPA", type: "Professional Membership", urgency: "MEDIUM", note: "CFO and Audit Committee networks. Chapters in major cities hold regular events and CPE sessions.", url: "https://www.picpa.com.ph" },
   ]},
 ];
-
 // ─── MINDSET ──────────────────────────────────────────────────────────────────
 const mindsetPillars = [
   { icon: "🧠", title: "Adversarial Resilience", subtitle: "Train for cross-examination before you face it", color: "orange", practices: ["Practice 'stress inoculation': regularly expose yourself to being challenged on your work. Ask colleagues to poke holes in your analysis.", "Record yourself explaining your findings out loud — then critique your own clarity, pace, and composure.", "Read transcripts of CPA expert cross-examinations (available in published SC decisions) — study how experts buckle and how they hold.", "Join a Toastmasters chapter or debate club — adversarial Q&A is a trainable skill, not a personality trait.", "Book: 'Effective Expert Witnessing' by Jack Matson — covers psychological preparation for hostile questioning."] },
@@ -526,7 +515,6 @@ const mindsetPillars = [
   { icon: "🪞", title: "Identity Shift", subtitle: "From 'employed analyst' to 'independent credentialed expert'", color: "green", practices: ["Rewrite your professional self-narrative: you are activating a rare credential set, not leaving a job.", "Book: 'The War of Art' by Steven Pressfield — on turning professional and overcoming resistance.", "Weekly journaling prompt: 'What would a recognized forensic expert in PH do this week that I am not yet doing?'", "Find one mentor or peer who has already gone independent — mirror their posture, not just their tactics.", "Celebrate credentials loudly on LinkedIn — CPA + CIA is not bragging, it's professional context clients need."] },
   { icon: "🏋️", title: "High-Stakes Communication", subtitle: "Your voice is a professional instrument — train it", color: "red", practices: ["Study the difference between expert report writing and consulting report writing — courts require specific structure.", "Practice delivering your expert opinion in exactly 60 seconds — clarity under time pressure is a courtroom skill.", "Video-record yourself giving testimony in a mock scenario — watch it back critically.", "Book: 'Talk Like TED' by Carmine Gallo — high-stakes communication for courtrooms and boardrooms.", "Eliminate: 'basically,' 'I think,' 'sort of,' 'maybe' — replace with precise quantified statements."] },
 ];
-
 // ─── AI WORKFLOWS ─────────────────────────────────────────────────────────────
 const aiWorkflows = [
   { id: "aw1", icon: "🔍", color: "gold", title: "Forensic Data Analysis", subtitle: "AI as your co-analyst on live engagements", edge: "Replaces weeks of manual query writing. You focus on interpretation and judgment — AI handles the computation.",
@@ -567,7 +555,6 @@ const aiWorkflows = [
     ]
   },
 ];
-
 // ─── PRICING ──────────────────────────────────────────────────────────────────
 const pricingServices = [
   { title: "Forensic BI Assessment", icon: "🔍", color: "gold", desc: "Fixed-scope, fixed-price engagement. Your flagship product. Deliverable: forensic BI report with findings, visualizations, and recommendations.", tiers: [
@@ -586,7 +573,6 @@ const pricingServices = [
     { tier: "AU Remote Retainer", scope: "Full service delivered remotely for AU-based clients", php: "N/A", usd: "USD 2,500 – 4,500/mo", note: "Price in AU market terms. Your cost base = your margin advantage." },
   ]},
 ];
-
 // ─── CLIENTS ──────────────────────────────────────────────────────────────────
 const clients = [
   { name: "PSE-Listed Companies", icon: "📊", why: "Required independent Audit Committees; forensic BI assessments of internal controls are a natural procurement", credential: "CPA + CIA" },
@@ -596,7 +582,6 @@ const clients = [
   { name: "AU Clients (Remote)", icon: "🌏", why: "Your existing network + AU market experience; PH cost base gives you a competitive price advantage", credential: "AU Experience" },
   { name: "Mid-size Audit Firms", icon: "🔬", why: "Subcontracting for forensic BI capability they don't have in-house; faster pipeline than direct clients", credential: "CPA + CIA" },
 ];
-
 // ─── RISKS ────────────────────────────────────────────────────────────────────
 const risks = [
   { icon: "⚖️", label: "Slow deal cycles", note: "Forensic and board-level engagements take 2–4 months to close. Start pipeline activity before you resign." },
@@ -606,7 +591,6 @@ const risks = [
   { icon: "🪪", label: "License compliance gap", note: "CPA CPE and CIA CPE have separate requirements. Track both during the transition — a lapsed credential is costly." },
   { icon: "🏛️", label: "Expert witness liability", note: "Litigation support carries professional liability risk. Ensure E&O insurance covers expert witness testimony before accepting." },
 ];
-
 // ─── MILESTONES ───────────────────────────────────────────────────────────────
 const milestonesList = [
   { id: "m1", icon: "🔑", title: "Resigned / Handed In Notice", desc: "The moment you committed to your own path." },
@@ -624,12 +608,11 @@ const milestonesList = [
 ];
 
 const urgencyColors = { HIGH: "red", MEDIUM: "gold" };
-
 // ─── ENCLAVE INTEGRATION ──────────────────────────────────────────────────────
 const ENCLAVE_URL = "https://bobbynacario-design.github.io/enclave";
-// Pass 1 link shape stored in localStorage key "enclaveLink"
-// { projectId: string|null, status: "not_linked"|"checking"|"linked"|"broken", lastChecked: number|null }
-
+// Per-mode link shape stored in Firestore field "fbaLinks":
+// { solo: LinkObj, partnership: LinkObj, client: LinkObj }
+// where LinkObj = { projectId: string|null, status: "not_linked"|"checking"|"linked"|"broken", lastChecked: number|null }
 // ─── TOP RISK COMPUTATION ─────────────────────────────────────────────────────
 function computeTopRisk(ctx) {
   const { mode, runwayMonths, prospects, currentPhase, currentPhaseId,
@@ -754,7 +737,6 @@ function computeTopRisk(ctx) {
   const enriched = { ...ctx, mustTotal, mustDone, unownedMust };
   return riskRules.find(r => r.when(enriched))?.build(enriched) ?? risks[0];
 }
-
 // ─── ENCLAVE LINK NORMALIZER ──────────────────────────────────────────────────
 // Firestore auto-IDs are 20 chars of [A-Za-z0-9]. Allow up to 64 to tolerate
 // custom IDs, and strip anything that doesn't match rather than letting a
@@ -768,7 +750,6 @@ function normalizeEnclaveLink(link) {
       : null,
   };
 }
-
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 function Strategy() {
   // ── Core State ───────────────────────────────────────────────────────────────
@@ -818,7 +799,10 @@ function Strategy() {
   // ── Enclave Integration ───────────────────────────────────────────────────────
   const [fbUser, setFbUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
-  const [enclaveLink, setEnclaveLink] = useState({ projectId: null, status: "not_linked", lastChecked: null });
+  const EMPTY_LINK = { projectId: null, status: "not_linked", lastChecked: null };
+  const [enclaveLinks, setEnclaveLinks] = useState({ solo: EMPTY_LINK, partnership: EMPTY_LINK, client: EMPTY_LINK });
+  // Derived — always the active mode's link. All read sites use this alias unchanged.
+  const enclaveLink = enclaveLinks[workspaceMode] ?? EMPTY_LINK;
   const [collabCreating, setCollabCreating] = useState(false);
   const [collabError, setCollabError] = useState(null);
   const [relinkModal, setRelinkModal] = useState(false);
@@ -881,7 +865,7 @@ function Strategy() {
     load();
   }, []);
 
-  // ── Firebase Auth Listener — also loads enclaveLink from Firestore ───────────
+  // ── Firebase Auth Listener — also loads per-mode enclaveLinks from Firestore ──
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(async user => {
       setFbUser(user);
@@ -889,12 +873,26 @@ function Strategy() {
       if (user) {
         try {
           const snap = await firebase.firestore().doc(`users/${user.uid}`).get();
-          if (snap.exists && snap.data().fbaLink) setEnclaveLink(normalizeEnclaveLink(snap.data().fbaLink));
-          if (snap.exists && snap.data().roadmapMode) setWorkspaceMode(snap.data().roadmapMode);
-        } catch (err) { console.error("Load fbaLink from Firestore error:", err); }
+          if (snap.exists) {
+            if (snap.data().fbaLinks) {
+              // Current shape — per-mode object
+              const raw = snap.data().fbaLinks;
+              setEnclaveLinks({
+                solo:        normalizeEnclaveLink(raw.solo        || EMPTY_LINK),
+                partnership: normalizeEnclaveLink(raw.partnership || EMPTY_LINK),
+                client:      normalizeEnclaveLink(raw.client      || EMPTY_LINK),
+              });
+            } else if (snap.data().fbaLink) {
+              // Legacy single-link — migrate into the user's stored mode slot
+              const legacyMode = snap.data().roadmapMode || "solo";
+              setEnclaveLinks(prev => ({ ...prev, [legacyMode]: normalizeEnclaveLink(snap.data().fbaLink) }));
+            }
+            if (snap.data().roadmapMode) setWorkspaceMode(snap.data().roadmapMode);
+          }
+        } catch (err) { console.error("Load fbaLinks from Firestore error:", err); }
       } else {
-        // User signed out — clear the link
-        setEnclaveLink({ projectId: null, status: "not_linked", lastChecked: null });
+        // User signed out — clear all mode links
+        setEnclaveLinks({ solo: EMPTY_LINK, partnership: EMPTY_LINK, client: EMPTY_LINK });
       }
     });
     return () => unsubscribe();
@@ -908,7 +906,7 @@ function Strategy() {
     const stale = !enclaveLink.lastChecked || (Date.now() - enclaveLink.lastChecked > 5 * 60 * 1000);
     if (!stale && enclaveLink.status !== "not_linked") return;
     checkLinkedProject(enclaveLink.projectId);
-  }, [authReady, fbUser, loaded]);
+  }, [authReady, fbUser, loaded, workspaceMode]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
   const toggleTask = (id) => { const n = { ...completed, [id]: !completed[id] }; setCompleted(n); save("completed", n); };
@@ -940,11 +938,12 @@ function Strategy() {
   // ── Enclave helpers ───────────────────────────────────────────────────────────
   const saveEnclaveLink = (patch) => {
     const next = { ...enclaveLink, ...patch };
-    setEnclaveLink(next);
-    // Persist to Firestore (cross-device) instead of localStorage
+    const nextLinks = { ...enclaveLinks, [workspaceMode]: next };
+    setEnclaveLinks(nextLinks);
+    // Persist per-mode object to Firestore (cross-device)
     if (fbUser) {
       firebase.firestore().doc(`users/${fbUser.uid}`)
-        .set({ fbaLink: next }, { merge: true })
+        .set({ fbaLinks: nextLinks }, { merge: true })
         .catch(err => console.error("saveEnclaveLink Firestore error:", err));
     }
   };

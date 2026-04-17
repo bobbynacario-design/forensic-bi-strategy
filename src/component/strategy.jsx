@@ -47,7 +47,10 @@ function Strategy() {
   // ── Enclave Integration ───────────────────────────────────────────────────────
   const [fbUser, setFbUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
-  const [enclaveLink, setEnclaveLink] = useState({ projectId: null, status: "not_linked", lastChecked: null });
+  const EMPTY_LINK = { projectId: null, status: "not_linked", lastChecked: null };
+  const [enclaveLinks, setEnclaveLinks] = useState({ solo: EMPTY_LINK, partnership: EMPTY_LINK, client: EMPTY_LINK });
+  // Derived — always the active mode's link. All read sites use this alias unchanged.
+  const enclaveLink = enclaveLinks[workspaceMode] ?? EMPTY_LINK;
   const [collabCreating, setCollabCreating] = useState(false);
   const [collabError, setCollabError] = useState(null);
   const [relinkModal, setRelinkModal] = useState(false);
@@ -110,7 +113,7 @@ function Strategy() {
     load();
   }, []);
 
-  // ── Firebase Auth Listener — also loads enclaveLink from Firestore ───────────
+  // ── Firebase Auth Listener — also loads per-mode enclaveLinks from Firestore ──
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(async user => {
       setFbUser(user);
@@ -118,12 +121,26 @@ function Strategy() {
       if (user) {
         try {
           const snap = await firebase.firestore().doc(`users/${user.uid}`).get();
-          if (snap.exists && snap.data().fbaLink) setEnclaveLink(normalizeEnclaveLink(snap.data().fbaLink));
-          if (snap.exists && snap.data().roadmapMode) setWorkspaceMode(snap.data().roadmapMode);
-        } catch (err) { console.error("Load fbaLink from Firestore error:", err); }
+          if (snap.exists) {
+            if (snap.data().fbaLinks) {
+              // Current shape — per-mode object
+              const raw = snap.data().fbaLinks;
+              setEnclaveLinks({
+                solo:        normalizeEnclaveLink(raw.solo        || EMPTY_LINK),
+                partnership: normalizeEnclaveLink(raw.partnership || EMPTY_LINK),
+                client:      normalizeEnclaveLink(raw.client      || EMPTY_LINK),
+              });
+            } else if (snap.data().fbaLink) {
+              // Legacy single-link — migrate into the user's stored mode slot
+              const legacyMode = snap.data().roadmapMode || "solo";
+              setEnclaveLinks(prev => ({ ...prev, [legacyMode]: normalizeEnclaveLink(snap.data().fbaLink) }));
+            }
+            if (snap.data().roadmapMode) setWorkspaceMode(snap.data().roadmapMode);
+          }
+        } catch (err) { console.error("Load fbaLinks from Firestore error:", err); }
       } else {
-        // User signed out — clear the link
-        setEnclaveLink({ projectId: null, status: "not_linked", lastChecked: null });
+        // User signed out — clear all mode links
+        setEnclaveLinks({ solo: EMPTY_LINK, partnership: EMPTY_LINK, client: EMPTY_LINK });
       }
     });
     return () => unsubscribe();
@@ -137,7 +154,7 @@ function Strategy() {
     const stale = !enclaveLink.lastChecked || (Date.now() - enclaveLink.lastChecked > 5 * 60 * 1000);
     if (!stale && enclaveLink.status !== "not_linked") return;
     checkLinkedProject(enclaveLink.projectId);
-  }, [authReady, fbUser, loaded]);
+  }, [authReady, fbUser, loaded, workspaceMode]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
   const toggleTask = (id) => { const n = { ...completed, [id]: !completed[id] }; setCompleted(n); save("completed", n); };
@@ -169,11 +186,12 @@ function Strategy() {
   // ── Enclave helpers ───────────────────────────────────────────────────────────
   const saveEnclaveLink = (patch) => {
     const next = { ...enclaveLink, ...patch };
-    setEnclaveLink(next);
-    // Persist to Firestore (cross-device) instead of localStorage
+    const nextLinks = { ...enclaveLinks, [workspaceMode]: next };
+    setEnclaveLinks(nextLinks);
+    // Persist per-mode object to Firestore (cross-device)
     if (fbUser) {
       firebase.firestore().doc(`users/${fbUser.uid}`)
-        .set({ fbaLink: next }, { merge: true })
+        .set({ fbaLinks: nextLinks }, { merge: true })
         .catch(err => console.error("saveEnclaveLink Firestore error:", err));
     }
   };
