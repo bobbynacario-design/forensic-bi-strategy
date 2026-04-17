@@ -70,6 +70,12 @@ function Strategy() {
   const [invoiced, setInvoiced] = useState(0);
   const [collectedAmt, setCollectedAmt] = useState(0);
 
+  // ── Firebase availability guard ───────────────────────────────────────────────
+  // Firebase is loaded via CDN in index.html. If it fails (network block, ad
+  // blocker, slow connection) the app must not crash — it falls back to full
+  // localStorage-only mode. All firebase.* call sites check this flag first.
+  const FIREBASE_AVAILABLE = typeof firebase !== 'undefined';
+
   // ── Theme ─────────────────────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch (err) { console.warn('[Praxis] theme localStorage read failed:', err); return 'dark'; } });
   // Active theme palette — used by all component rendering
@@ -84,7 +90,7 @@ function Strategy() {
   // localStorage = offline cache / instant reads; Firestore = cross-device sync.
   const save = async (key, val) => {
     try { await window.storage.set(key, JSON.stringify(val)); } catch (err) { console.warn('[Praxis] storage.set failed for key:', key, err); }
-    if (fbUser) {
+    if (FIREBASE_AVAILABLE && fbUser) {
       firebase.firestore().doc(`users/${fbUser.uid}`)
         .set({ [`roadmapState.${key}`]: val }, { merge: true })
         .catch(err => console.warn('[Praxis] Firestore sync failed for key:', key, err));
@@ -124,6 +130,7 @@ function Strategy() {
 
   // ── Firebase Auth Listener — also loads per-mode enclaveLinks from Firestore ──
   useEffect(() => {
+    if (!FIREBASE_AVAILABLE) { setAuthReady(true); return; } // graceful offline mode
     const unsubscribe = firebase.auth().onAuthStateChanged(async user => {
       setFbUser(user);
       setAuthReady(true);
@@ -235,7 +242,7 @@ function Strategy() {
     const nextLinks = { ...enclaveLinks, [workspaceMode]: next };
     setEnclaveLinks(nextLinks);
     // Persist per-mode object to Firestore (cross-device)
-    if (fbUser) {
+    if (FIREBASE_AVAILABLE && fbUser) {
       firebase.firestore().doc(`users/${fbUser.uid}`)
         .set({ fbaLinks: nextLinks }, { merge: true })
         .catch(err => console.error("saveEnclaveLink Firestore error:", err));
@@ -243,14 +250,15 @@ function Strategy() {
   };
 
   const signInWithGoogle = () => {
+    if (!FIREBASE_AVAILABLE) return;
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider).catch(err => console.error("Sign-in error:", err));
   };
 
-  const signOutFirebase = () => firebase.auth().signOut();
+  const signOutFirebase = () => { if (FIREBASE_AVAILABLE) firebase.auth().signOut(); };
 
   const checkLinkedProject = async (projectId) => {
-    if (!projectId) return;
+    if (!projectId || !FIREBASE_AVAILABLE) return;
     saveEnclaveLink({ status: "checking" });
     try {
       const snap = await firebase.firestore().doc(`projects/${projectId}`).get();
@@ -420,19 +428,21 @@ function Strategy() {
   const deleteProspect = (id) => { const n = prospects.filter(p => p.id !== id); setProspects(n); save("prospects", n); };
 
   // ── Derived Values ────────────────────────────────────────────────────────────
-  const allPhaseTasks = phases.flatMap(p => p.tasks);
-  const totalTasks = allPhaseTasks.length;
-  const completedCount = Object.values(completed).filter(Boolean).length;
-  const pct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
   const achievedCount = Object.values(achieved).filter(Boolean).length;
   const totalPersonalBurn = Object.values(monthly).reduce((a, b) => a + Number(b), 0);
   const totalBurn = totalPersonalBurn + Number(bizOverhead);
   const runwayMonths = totalPersonalBurn > 0 ? Math.floor(Number(savings) / totalPersonalBurn) : 0;
   const netMonthly = projectedMonthly - totalBurn;
   const minBillingToResign = totalBurn > 0 ? Math.round(totalBurn / (1 - taxRate / 100) / (utilization / 100)) : 0;
-  // Mode-aware phase and milestone data
+  // Mode-aware phase and milestone data — must come before progress counts
   const activePhases = workspaceMode === "partnership" ? partnershipPhases : workspaceMode === "client" ? clientPhases : phases;
   const activeMilestones = workspaceMode === "partnership" ? partnershipMilestones : workspaceMode === "client" ? clientMilestones : milestonesList;
+  // Progress: scoped to the current mode's task set only
+  const allPhaseTasks = activePhases.flatMap(p => p.tasks);
+  const totalTasks = allPhaseTasks.length;
+  const activeTaskIds = new Set(allPhaseTasks.map(t => t.id));
+  const completedCount = Object.keys(completed).filter(id => completed[id] && activeTaskIds.has(id)).length;
+  const pct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
   const currentPhase = activePhases.find(p => p.id === currentPhaseId) || activePhases[0];
   const viewPhase = activePhases.find(p => p.id === activePhaseView) || activePhases[0];
   const topMustTasks = currentPhase.tasks.filter(t => t.priority === "Must" && !completed[t.id]).slice(0, 3);
@@ -767,7 +777,7 @@ function Strategy() {
                           </>
                         )}
                         {authReady && fbUser && (
-                          <span style={{ fontSize: 11, color: C.textMute, ...SF, cursor: "pointer", textDecoration: "underline" }} onClick={signOutFirebase}>{fbUser.displayName || fbUser.email} · Sign out</span>
+                          <span role="button" tabIndex={0} onKeyDown={e => (e.key === ' ' || e.key === 'Enter') && signOutFirebase()} style={{ fontSize: 11, color: C.textMute, ...SF, cursor: "pointer", textDecoration: "underline" }} onClick={signOutFirebase}>{fbUser.displayName || fbUser.email} · Sign out</span>
                         )}
                       </div>
                     </div>
