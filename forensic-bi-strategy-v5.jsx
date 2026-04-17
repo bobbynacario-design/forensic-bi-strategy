@@ -755,6 +755,20 @@ function computeTopRisk(ctx) {
   return riskRules.find(r => r.when(enriched))?.build(enriched) ?? risks[0];
 }
 
+// ─── ENCLAVE LINK NORMALIZER ──────────────────────────────────────────────────
+// Firestore auto-IDs are 20 chars of [A-Za-z0-9]. Allow up to 64 to tolerate
+// custom IDs, and strip anything that doesn't match rather than letting a
+// malformed value reach a URL or Firestore query.
+function normalizeEnclaveLink(link) {
+  const id = link && link.projectId;
+  return {
+    ...link,
+    projectId: typeof id === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(id.trim())
+      ? id.trim()
+      : null,
+  };
+}
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 function Strategy() {
   // ── Core State ───────────────────────────────────────────────────────────────
@@ -875,7 +889,7 @@ function Strategy() {
       if (user) {
         try {
           const snap = await firebase.firestore().doc(`users/${user.uid}`).get();
-          if (snap.exists && snap.data().fbaLink) setEnclaveLink(snap.data().fbaLink);
+          if (snap.exists && snap.data().fbaLink) setEnclaveLink(normalizeEnclaveLink(snap.data().fbaLink));
           if (snap.exists && snap.data().roadmapMode) setWorkspaceMode(snap.data().roadmapMode);
         } catch (err) { console.error("Load fbaLink from Firestore error:", err); }
       } else {
@@ -1079,8 +1093,9 @@ function Strategy() {
     if (!relinkId.trim()) return;
     setRelinkModal(false);
     setRelinkId("");
-    saveEnclaveLink({ projectId: relinkId.trim(), status: "checking", lastChecked: null });
-    checkLinkedProject(relinkId.trim());
+    const cleanId = /^[A-Za-z0-9_-]{1,64}$/.test(relinkId.trim()) ? relinkId.trim() : null;
+    saveEnclaveLink({ projectId: cleanId, status: cleanId ? "checking" : "not_linked", lastChecked: null });
+    if (cleanId) checkLinkedProject(cleanId);
   };
   const addProspect = () => {
     if (!newProspect.name.trim()) return;
@@ -1119,8 +1134,12 @@ function Strategy() {
   });
 
   // ── Inject CSS ────────────────────────────────────────────────────────────────
+  // Re-uses the same <style> tag on theme change instead of remove+add, which
+  // would briefly un-style the page between React paint cycles.
   useEffect(() => {
-    const s = document.createElement("style");
+    const STYLE_ID = 'praxis-dynamic-styles';
+    let s = document.getElementById(STYLE_ID);
+    if (!s) { s = document.createElement('style'); s.id = STYLE_ID; document.head.appendChild(s); }
     const hoverBorder = theme === 'dark' ? '#3a3f50' : '#c5bfb5';
     s.innerHTML = `
       .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -1134,8 +1153,7 @@ function Strategy() {
       .task-row:hover{border-color:${hoverBorder}!important}
       .prospect-card:hover{border-color:${hoverBorder}!important}
     `;
-    document.head.appendChild(s);
-    return () => document.head.removeChild(s);
+    // No cleanup — the style tag persists for the app's lifetime.
   }, [theme]);
 
   // ── Sub-components ────────────────────────────────────────────────────────────
@@ -1676,9 +1694,9 @@ function Strategy() {
             <p style={{ color: C.textDim, fontSize: 13, ...SF, marginBottom: 20, fontStyle: "italic" }}>Same day, same time, every week. Decide first, then reflect. Answers are saved.</p>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <span style={{ color: C.gold, fontSize: 13, ...SF }}>Week:</span>
-              <button onClick={() => { setWeekNumber(Math.max(1, weekNumber - 1)); setWeekAnswers(savedReviews[weekNumber - 1]?.answers || {}); }} style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 14 }}>←</button>
+              <button onClick={() => { const prev = Math.max(1, weekNumber - 1); setWeekNumber(prev); setWeekAnswers(savedReviews[prev]?.answers || {}); }} style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 14 }}>←</button>
               <span style={{ color: C.text, fontSize: 18, fontWeight: 600, ...SF, minWidth: 40, textAlign: "center" }}>#{weekNumber}</span>
-              <button onClick={() => { setWeekNumber(weekNumber + 1); setWeekAnswers(savedReviews[weekNumber + 1]?.answers || {}); }} style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 14 }}>→</button>
+              <button onClick={() => { const next = weekNumber + 1; setWeekNumber(next); setWeekAnswers(savedReviews[next]?.answers || {}); }} style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 14 }}>→</button>
               {savedReviews[weekNumber] && <span style={{ fontSize: 11, color: C.green, ...SF }}>✓ Saved · {savedReviews[weekNumber].date}</span>}
             </div>
 
@@ -2154,7 +2172,7 @@ function Strategy() {
                   {p.tasks.map(task => {
                     const done = completed[task.id];
                     return (
-                      <div key={task.id} onClick={() => !(!track2Unlocked) && toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${p.color}08` : C.bg, border: `1px solid ${done ? p.color + "35" : C.borderSub}`, cursor: !track2Unlocked ? "not-allowed" : "pointer", transition: "all 0.15s", marginBottom: 7, opacity: !track2Unlocked ? 0.5 : 1 }}>
+                      <div key={task.id} onClick={() => track2Unlocked && toggleTask(task.id)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${p.color}08` : C.bg, border: `1px solid ${done ? p.color + "35" : C.borderSub}`, cursor: !track2Unlocked ? "not-allowed" : "pointer", transition: "all 0.15s", marginBottom: 7, opacity: !track2Unlocked ? 0.5 : 1 }}>
                         <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? p.color : "#3a3f50"}`, background: done ? p.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           {done && <span style={{ color: "#0D0F14", fontSize: 11, fontWeight: 700 }}>✓</span>}
                         </div>
