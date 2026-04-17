@@ -825,21 +825,21 @@ function Strategy() {
   const [collectedAmt, setCollectedAmt] = useState(0);
 
   // ── Theme ─────────────────────────────────────────────────────────────────────
-  const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch { return 'dark'; } });
+  const [theme, setTheme] = useState(() => { try { return localStorage.getItem('fba_theme') || 'dark'; } catch (err) { console.warn('[Praxis] theme localStorage read failed:', err); return 'dark'; } });
   // Active theme palette — used by all component rendering
   const C = theme === 'dark' ? DARK_C : LIGHT_C;
   const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: "24px 28px" };
   const inputSt = { background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, color: C.text, padding: "10px 14px", fontSize: 15, ...SF, width: "100%", boxSizing: "border-box", outline: "none" };
-  const toggleTheme = () => { const n = theme === 'dark' ? 'light' : 'dark'; setTheme(n); try { localStorage.setItem('fba_theme', n); } catch {} };
+  const toggleTheme = () => { const n = theme === 'dark' ? 'light' : 'dark'; setTheme(n); try { localStorage.setItem('fba_theme', n); } catch (err) { console.warn('[Praxis] theme localStorage write failed:', err); } };
   const headerBg = theme === 'dark' ? 'linear-gradient(135deg,#0D0F14 0%,#1a1f2e 100%)' : 'linear-gradient(135deg,#F0ECE7 0%,#EAE5DE 100%)';
 
   // ── Storage ───────────────────────────────────────────────────────────────────
-  const save = async (key, val) => { try { await window.storage.set(key, JSON.stringify(val)); } catch {} };
+  const save = async (key, val) => { try { await window.storage.set(key, JSON.stringify(val)); } catch (err) { console.warn('[Praxis] storage.set failed for key:', key, err); } };
 
   useEffect(() => {
     const load = async () => {
       const tryLoad = async (key, setter) => {
-        try { const r = await window.storage.get(key); if (r) setter(JSON.parse(r.value)); } catch {}
+        try { const r = await window.storage.get(key); if (r) setter(JSON.parse(r.value)); } catch (err) { console.warn('[Praxis] storage.get failed for key:', key, err); }
       };
       await tryLoad("completed", setCompleted);
       await tryLoad("gateCompleted", setGateCompleted);
@@ -853,15 +853,15 @@ function Strategy() {
       try {
         const r = await window.storage.get("financial");
         if (r) { const f = JSON.parse(r.value); setMonthly(f.monthly); setSavings(f.savings); setProjectedMonthly(f.projectedMonthly || 0); setTaxRate(f.taxRate || 25); setBizOverhead(f.bizOverhead || 15000); setUtilization(f.utilization || 70); }
-      } catch {}
+      } catch (err) { console.warn('[Praxis] storage.get failed for key: financial', err); }
       try {
         const rp = await window.storage.get("financePartnership");
         if (rp) { const fp = JSON.parse(rp.value); if (fp.partnerRows) setPartnerRows(fp.partnerRows); if (fp.sharedOverhead != null) setSharedOverhead(fp.sharedOverhead); }
-      } catch {}
+      } catch (err) { console.warn('[Praxis] storage.get failed for key: financePartnership', err); }
       try {
         const rc = await window.storage.get("financeClient");
         if (rc) { const fc = JSON.parse(rc.value); if (fc.engagementValue != null) setEngagementValue(fc.engagementValue); if (fc.invoiced != null) setInvoiced(fc.invoiced); if (fc.collectedAmt != null) setCollectedAmt(fc.collectedAmt); }
-      } catch {}
+      } catch (err) { console.warn('[Praxis] storage.get failed for key: financeClient', err); }
       setLoaded(true);
     };
     load();
