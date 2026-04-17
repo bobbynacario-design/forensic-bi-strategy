@@ -31,13 +31,17 @@ function Strategy() {
   const [utilization, setUtilization] = useState(70);
 
   // ── Pipeline ──────────────────────────────────────────────────────────────────
-  const [prospects, setProspects] = useState([]);
+  // Keyed by mode — { solo: [], partnership: [], client: [] }
+  const [prospects, setProspects] = useState({ solo: [], partnership: [], client: [] });
   const [newProspect, setNewProspect] = useState({ name: "", company: "", stage: "prospect", note: "", owner: "" });
   const [showAddProspect, setShowAddProspect] = useState(false);
 
   // ── Workspace mode ────────────────────────────────────────────────────────────
   const [workspaceMode, setWorkspaceMode] = useState("solo");
-  const [taskOwners, setTaskOwners] = useState({});
+  // Task owners keyed by mode — { solo: {}, partnership: {}, client: {} }
+  const [taskOwners, setTaskOwners] = useState({ solo: {}, partnership: {}, client: {} });
+  // Last viewed phase per mode — restored when switching back to a lane
+  const [lastPhasePerMode, setLastPhasePerMode] = useState({ solo: "A", partnership: "P1", client: "C1" });
 
   // ── Milestones ────────────────────────────────────────────────────────────────
   const [achieved, setAchieved] = useState({});
@@ -108,8 +112,16 @@ function Strategy() {
       await tryLoad("achieved", setAchieved);
       await tryLoad("milestoneDate", setMilestoneDate);
       await tryLoad("savedReviews", setSavedReviews);
-      await tryLoad("prospects", setProspects);
-      await tryLoad("taskOwners", setTaskOwners);
+      await tryLoad("prospects", (val) => {
+        // Migrate: old format was a flat array; new format is { solo, partnership, client }
+        setProspects(Array.isArray(val) ? { solo: val, partnership: [], client: [] } : val);
+      });
+      await tryLoad("taskOwners", (val) => {
+        // Migrate: old format had task-ID keys directly; new format is { solo, partnership, client }
+        const isOld = val && !val.solo && !val.partnership && !val.client;
+        setTaskOwners(isOld ? { solo: val, partnership: {}, client: {} } : val);
+      });
+      await tryLoad("lastPhasePerMode", setLastPhasePerMode);
       // enclaveLink is loaded from Firestore in the auth listener, not localStorage
       try {
         const r = await window.storage.get("financial");
@@ -165,8 +177,16 @@ function Strategy() {
             if (s.achieved)       setAchieved(s.achieved);
             if (s.milestoneDate)  setMilestoneDate(s.milestoneDate);
             if (s.savedReviews)   setSavedReviews(s.savedReviews);
-            if (s.prospects)      setProspects(s.prospects);
-            if (s.taskOwners)     setTaskOwners(s.taskOwners);
+            if (s.prospects) {
+              const v = s.prospects;
+              setProspects(Array.isArray(v) ? { solo: v, partnership: [], client: [] } : v);
+            }
+            if (s.taskOwners) {
+              const v = s.taskOwners;
+              const isOld = v && !v.solo && !v.partnership && !v.client;
+              setTaskOwners(isOld ? { solo: v, partnership: {}, client: {} } : v);
+            }
+            if (s.lastPhasePerMode) setLastPhasePerMode(s.lastPhasePerMode);
             if (s.financial) {
               const f = s.financial;
               if (f.monthly)               setMonthly(f.monthly);
@@ -376,12 +396,20 @@ function Strategy() {
   const relinkSpace = () => { setRelinkId(""); setRelinkModal(true); setSetupModal(false); };
 
   const saveWorkspaceMode = (mode) => {
+    // Save current phase position before leaving this mode
+    const nextLastPhase = { ...lastPhasePerMode, [workspaceMode]: activePhaseView };
+    setLastPhasePerMode(nextLastPhase);
+    save("lastPhasePerMode", nextLastPhase);
+
     setWorkspaceMode(mode);
-    // Reset phase view to first phase of the new mode's lane
-    const firstId = mode === "partnership" ? "P1" : mode === "client" ? "C1" : "A";
-    setCurrentPhaseId(firstId);
-    setActivePhaseView(firstId);
-    if (fbUser) {
+
+    // Restore the last viewed phase for the incoming mode (fallback to first phase)
+    const fallbackId = mode === "partnership" ? "P1" : mode === "client" ? "C1" : "A";
+    const restoreId = nextLastPhase[mode] || fallbackId;
+    setCurrentPhaseId(restoreId);
+    setActivePhaseView(restoreId);
+
+    if (FIREBASE_AVAILABLE && fbUser) {
       firebase.firestore().doc(`users/${fbUser.uid}`)
         .set({ roadmapMode: mode }, { merge: true })
         .catch(err => console.error("saveWorkspaceMode error:", err));
@@ -390,6 +418,9 @@ function Strategy() {
   const modeLabel = workspaceMode === "solo" ? "👤 Solo" : workspaceMode === "partnership" ? "🤝 Partnership" : "💼 Client";
   const modeColor = workspaceMode === "solo" ? C.textMute : workspaceMode === "partnership" ? C.blue : C.purple;
   const isTeamMode = workspaceMode !== "solo";
+  // Per-mode derived aliases — all read sites use these instead of the raw state objects
+  const modeProspects   = prospects[workspaceMode]  ?? [];
+  const modeTaskOwners  = taskOwners[workspaceMode] ?? {};
   const modeDefs = [
     { id: "solo", label: "👤 Solo", color: C.textMute },
     { id: "partnership", label: "🤝 Partnership", color: C.blue },
@@ -421,11 +452,21 @@ function Strategy() {
   const addProspect = () => {
     if (!newProspect.name.trim()) return;
     const p = { ...newProspect, id: Date.now() };
-    const n = [...prospects, p]; setProspects(n); save("prospects", n);
+    const list = [...modeProspects, p];
+    const next = { ...prospects, [workspaceMode]: list };
+    setProspects(next); save("prospects", next);
     setNewProspect({ name: "", company: "", stage: "prospect", note: "", owner: "" }); setShowAddProspect(false);
   };
-  const moveProspect = (id, stage) => { const n = prospects.map(p => p.id === id ? { ...p, stage } : p); setProspects(n); save("prospects", n); };
-  const deleteProspect = (id) => { const n = prospects.filter(p => p.id !== id); setProspects(n); save("prospects", n); };
+  const moveProspect = (id, stage) => {
+    const list = modeProspects.map(p => p.id === id ? { ...p, stage } : p);
+    const next = { ...prospects, [workspaceMode]: list };
+    setProspects(next); save("prospects", next);
+  };
+  const deleteProspect = (id) => {
+    const list = modeProspects.filter(p => p.id !== id);
+    const next = { ...prospects, [workspaceMode]: list };
+    setProspects(next); save("prospects", next);
+  };
 
   // ── Derived Values ────────────────────────────────────────────────────────────
   const achievedCount = Object.values(achieved).filter(Boolean).length;
@@ -452,8 +493,8 @@ function Strategy() {
   const gateClear = (phaseId) => gateCriteriaDone(phaseId) === gateTotal(phaseId);
   const track2Unlocked = workspaceMode === "solo" && gateClear("C");
   const topRisk = computeTopRisk({
-    mode: workspaceMode, runwayMonths, prospects, currentPhase, currentPhaseId,
-    completed, taskOwners, enclaveLink, gateCriteriaDone, gateTotal, gateClear, risks,
+    mode: workspaceMode, runwayMonths, prospects: modeProspects, currentPhase, currentPhaseId,
+    completed, taskOwners: modeTaskOwners, enclaveLink, gateCriteriaDone, gateTotal, gateClear, risks,
   });
 
   // ── Inject CSS ────────────────────────────────────────────────────────────────
@@ -487,7 +528,7 @@ function Strategy() {
 
   const TaskList = ({ tasks, color }) => tasks.map(task => {
     const done = completed[task.id];
-    const owner = taskOwners[task.id] || "";
+    const owner = modeTaskOwners[task.id] || "";
     return (
       <div key={task.id} className="task-row" role="checkbox" aria-checked={!!done} tabIndex={0} onClick={() => toggleTask(task.id)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleTask(task.id); } }} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "11px 13px", borderRadius: 7, background: done ? `${color}08` : C.bg, border: `1px solid ${done ? color + "35" : C.borderSub}`, cursor: "pointer", transition: "all 0.15s", marginBottom: 7 }}>
         <div aria-hidden="true" style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${done ? color : "#3a3f50"}`, background: done ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
@@ -498,7 +539,7 @@ function Strategy() {
         {isTeamMode && (
           <input
             value={owner}
-            onChange={e => { e.stopPropagation(); const n = { ...taskOwners, [task.id]: e.target.value }; setTaskOwners(n); save("taskOwners", n); }}
+            onChange={e => { e.stopPropagation(); const next = { ...taskOwners, [workspaceMode]: { ...modeTaskOwners, [task.id]: e.target.value } }; setTaskOwners(next); save("taskOwners", next); }}
             onClick={e => e.stopPropagation()}
             placeholder="Owner"
             style={{ background: owner ? `${modeColor}12` : C.bg, border: `1px solid ${owner ? modeColor + "50" : C.border}`, borderRadius: 5, color: owner ? modeColor : C.textMute, padding: "2px 7px", fontSize: 11, ...SF, width: 80, flexShrink: 0, outline: "none" }}
@@ -699,10 +740,10 @@ function Strategy() {
                       <div aria-hidden="true" style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1, border: `1.5px solid ${C.red}`, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }} />
                       <span style={{ ...SF, fontSize: 13.5, color: C.textMid, lineHeight: 1.5, flex: 1 }}>{t.text}</span>
                       <PriorityBadge p={t.priority} />
-                      {isTeamMode && taskOwners[t.id] && (
-                        <span style={{ fontSize: 10, color: modeColor, background: `${modeColor}15`, border: `1px solid ${modeColor}30`, borderRadius: 10, padding: "1px 7px", ...SF, fontWeight: 600, flexShrink: 0 }}>👤 {taskOwners[t.id]}</span>
+                      {isTeamMode && modeTaskOwners[t.id] && (
+                        <span style={{ fontSize: 10, color: modeColor, background: `${modeColor}15`, border: `1px solid ${modeColor}30`, borderRadius: 10, padding: "1px 7px", ...SF, fontWeight: 600, flexShrink: 0 }}>👤 {modeTaskOwners[t.id]}</span>
                       )}
-                      {isTeamMode && !taskOwners[t.id] && (
+                      {isTeamMode && !modeTaskOwners[t.id] && (
                         <span style={{ fontSize: 10, color: C.textMute, background: `${C.red}10`, border: `1px solid ${C.red}20`, borderRadius: 10, padding: "1px 7px", ...SF, flexShrink: 0 }}>unassigned</span>
                       )}
                     </div>
@@ -850,7 +891,7 @@ function Strategy() {
                 <div style={{ ...card }}>
                   <div style={{ fontSize: 10, color: C.blue, ...SF, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 10 }}>📊 Pipeline</div>
                   {pipelineStageDefs.map(s => {
-                    const n = prospects.filter(p => p.stage === s.id).length;
+                    const n = modeProspects.filter(p => p.stage === s.id).length;
                     return n > 0 ? (
                       <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                         <span style={{ fontSize: 12, color: C.textDim, ...SF }}>{s.icon} {s.label}</span>
@@ -858,7 +899,7 @@ function Strategy() {
                       </div>
                     ) : null;
                   })}
-                  {prospects.length === 0 && <div style={{ fontSize: 12, color: C.textMute, ...SF }}>No prospects yet — go to Pipeline tab.</div>}
+                  {modeProspects.length === 0 && <div style={{ fontSize: 12, color: C.textMute, ...SF }}>No prospects yet — go to Pipeline tab.</div>}
                   <button onClick={() => setActiveTab("pipeline")} style={{ marginTop: 10, background: "transparent", border: `1px solid ${C.border}`, color: C.textMute, borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 11, ...SF }}>Open Pipeline →</button>
                 </div>
 
@@ -960,7 +1001,7 @@ function Strategy() {
             {/* Pipeline funnel stats */}
             <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
               {pipelineStageDefs.map(s => {
-                const n = prospects.filter(p => p.stage === s.id).length;
+                const n = modeProspects.filter(p => p.stage === s.id).length;
                 return (
                   <div key={s.id} style={{ background: n > 0 ? `${C[s.color] || s.color}12` : C.surface, border: `1px solid ${n > 0 ? (C[s.color] || s.color) + "40" : C.border}`, borderRadius: 8, padding: "10px 16px", textAlign: "center", minWidth: 90 }}>
                     <div style={{ fontSize: 16 }}>{s.icon}</div>
@@ -972,10 +1013,10 @@ function Strategy() {
             </div>
 
             {/* Prospect list */}
-            {prospects.length === 0
+            {modeProspects.length === 0
               ? <div style={{ ...card, textAlign: "center", color: C.textDim, ...SF, fontSize: 13 }}>No prospects yet. Add your first one above.<br /><span style={{ fontSize: 12, color: C.textMute }}>Target: 20 prospects by end of Phase B.</span></div>
               : pipelineStageDefs.map(stage => {
-                const stageProspects = prospects.filter(p => p.stage === stage.id);
+                const stageProspects = modeProspects.filter(p => p.stage === stage.id);
                 if (stageProspects.length === 0) return null;
                 return (
                   <div key={stage.id} style={{ marginBottom: 20 }}>
